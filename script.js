@@ -2,10 +2,15 @@ let allMenuItems = []; // Holds fetched menu items
 let currentCategory = "All";
 let searchQuery = "";
 
-// Auto-detect server address: use Mac's LAN IP when accessed from phone, localhost when on the same machine
+// Auto-detect server address
+// 1. If on localhost -> use localhost:3000
+// 2. If on a LAN IP -> use that IP:3000
+// 3. If on production (e.g. Render) -> use the current origin
 const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ? "http://localhost:3000"
-    : "http://192.168.29.241:3000";
+    : (window.location.hostname.match(/\d+\.\d+\.\d+\.\d+/) 
+        ? `http://${window.location.hostname}:3000` 
+        : window.location.origin);
 
 
 const menuGrid = document.getElementById("menuGrid");

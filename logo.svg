@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 48" role="img" aria-label="Smart Canteen logo">
+  <defs>
+    <linearGradient id="steam" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3d8b73" />
+      <stop offset="100%" stop-color="#e07a3c" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="6" width="46" height="36" rx="10" fill="#2f6e5a" />
+  <path d="M8 32h30c2 0 4-2 4-4V20c0-2-2-4-4-4H8c-2 0-4 2-4 4v8c0 2 2 4 4 4z" fill="#f7fff9" opacity="0.9"/>
+  <path d="M12 16c-3-4 4-8 1-12" stroke="url(#steam)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M22 16c-3-4 4-8 1-12" stroke="url(#steam)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M32 16c-3-4 4-8 1-12" stroke="url(#steam)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <text x="56" y="24" font-family="Space Grotesk, Segoe UI, sans-serif" font-size="16" font-weight="700" fill="#1f1f1c">Smart</text>
+  <text x="56" y="40" font-family="Space Grotesk, Segoe UI, sans-serif" font-size="14" font-weight="600" fill="#5c616a">Canteen</text>
+</svg>

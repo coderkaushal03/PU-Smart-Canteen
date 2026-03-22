@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canteen Admin Dashboard | Smart Canteen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #215747;
+            --brand-dark: #164033;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --line: #334155;
+            
+            --status-pending: #fbbf24;
+            --status-preparing: #3b82f6;
+            --status-ready: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--surface);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .header-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn {
+            background: var(--line);
+            color: var(--text-main);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover { background: #475569; }
+
+        .btn-logout {
+            background: #ef4444;
+        }
+
+        .btn-logout:hover { background: #dc2626; }
+
+        .dashboard {
+            padding: 40px;
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .column {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .column-badge {
+            background: var(--line);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+        }
+
+        .scroller {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .scroller::-webkit-scrollbar { display: none; }
+
+        .order-card {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .token {
+            font-weight: 700;
+            color: var(--brand);
+            background: #dcfce7;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .student-info { margin-bottom: 12px; }
+        .student-name { font-weight: 600; display: block; margin-bottom: 2px; }
+        .student-enroll { font-size: 0.85rem; color: var(--text-muted); }
+
+        .items-list {
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+        .item-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .notes {
+            background: #334155;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-action:hover { opacity: 0.9; }
+
+        .btn-preparing { background: var(--status-preparing); color: white; }
+        .btn-ready { background: var(--status-ready); color: white; }
+        .btn-complete { background: var(--text-muted); color: var(--bg); }
+        
+        .loading { text-align: center; color: var(--text-muted); grid-column: 1 / -1; padding: 40px;}
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-brand">Chef's Dashboard 🔪</div>
+        <div class="header-actions">
+            <button class="btn" onclick="fetchOrders()">🔄 Refresh</button>
+            <button class="btn btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- PENDING -->
+        <div class="column">
+            <div class="column-header">
+                <span style="color: var(--status-pending)">🟡 Pending</span>
+                <span class="column-badge" id="pendingCount">0</span>
+            </div>
+            <div class="scroller" id="col-pending"></div>
+        </div>
+
+        <!-- PREPARING -->
+        <div class="column">
+            <div class="column-header">
+                <span style="color: var(--status-preparing)">🔵 Preparing</span>
+                <span class="column-badge" id="preparingCount">0</span>
+            </div>
+            <div class="scroller" id="col-preparing"></div>
+        </div>
+
+        <!-- READY -->
+        <div class="column">
+            <div class="column-header">
+                <span style="color: var(--status-ready)">🟢 Ready for Pickup</span>
+                <span class="column-badge" id="readyCount">0</span>
+            </div>
+            <div class="scroller" id="col-ready"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:3000/api";
+        const token = localStorage.getItem("smartCanteenToken");
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        async function fetchOrders() {
+            try {
+                const res = await fetch(`${API_URL}/admin/orders`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                
+                if (res.status === 403) {
+                    alert("Access Denied. You must be an Admin.");
+                    window.location.href = "smartcanteen.html";
+                    return;
+                }
+
+                if (res.ok) {
+                    const orders = await res.json();
+                    renderKanban(orders);
+                }
+            } catch (err) {
+                console.error("Error fetching admin orders", err);
+            }
+        }
+
+        function createOrderCard(order, nextStatus, btnClass, btnLabel) {
+            const date = new Date(order.created_at);
+            const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            let itemsHtml = order.items.map(i => `
+                <div class="item-row">
+                    <span>${i.qty}x ${i.item_name}</span>
+                    <span>Rs ${i.price * i.qty}</span>
+                </div>
+            `).join("");
+
+            let notesHtml = order.notes ? `<div class="notes">" ${order.notes} "</div>` : '';
+            
+            let btnHtml = nextStatus ? `<div class="card-actions">
+                <button class="btn-action ${btnClass}" onclick="updateStatus(${order.id}, '${nextStatus}')">${btnLabel}</button>
+            </div>` : '';
+
+            return `
+                <div class="order-card">
+                    <div class="card-header">
+                        <span class="token">${order.token}</span>
+                        <span class="time">${order.pickup_time !== 'As soon as possible' ? 'Pickup: ' + order.pickup_time : timeStr}</span>
+                    </div>
+                    <div class="student-info">
+                        <span class="student-name">${order.student || 'Student'}</span>
+                        <span class="student-enroll">${order.enrollment || 'No ID'}</span>
+                    </div>
+                    <div class="items-list">
+                        ${itemsHtml}
+                    </div>
+                    ${notesHtml}
+                    ${btnHtml}
+                </div>
+            `;
+        }
+
+        function renderKanban(orders) {
+            const pending = orders.filter(o => o.status === 'Pending');
+            const preparing = orders.filter(o => o.status === 'Preparing');
+            const ready = orders.filter(o => o.status === 'Ready');
+
+            document.getElementById('pendingCount').textContent = pending.length;
+            document.getElementById('preparingCount').textContent = preparing.length;
+            document.getElementById('readyCount').textContent = ready.length;
+
+            document.getElementById('col-pending').innerHTML = pending.map(o => 
+                createOrderCard(o, 'Preparing', 'btn-preparing', 'Start Cooking ➜')
+            ).join("");
+
+            document.getElementById('col-preparing').innerHTML = preparing.map(o => 
+                createOrderCard(o, 'Ready', 'btn-ready', 'Mark Ready ➜')
+            ).join("");
+
+            document.getElementById('col-ready').innerHTML = ready.map(o => 
+                createOrderCard(o, 'Completed', 'btn-complete', 'Collected ✔')
+            ).join("");
+        }
+
+        async function updateStatus(orderId, newStatus) {
+            try {
+                await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: { 
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                fetchOrders(); // Refresh table
+            } catch (err) {
+                console.error("Failed to update status", err);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("smartCanteenToken");
+            localStorage.removeItem("smartCanteenUser");
+            window.location.href = "login.html";
+        }
+
+        // Poll every 5 seconds for live orders
+        fetchOrders();
+        setInterval(fetchOrders, 5000);
+    </script>
+</body>
+</html>

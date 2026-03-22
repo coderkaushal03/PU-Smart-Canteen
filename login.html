@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Canteen - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="topbar">
+        <img src="logo.svg" alt="Smart Canteen logo" class="logo">
+    </div>
+    <main class="page">
+        <header class="hero">
+            <p class="badge">Poornima University - Smart Canteen</p>
+            <h1>Student Login</h1>
+            <p>Use your college credentials to access pre-order services.</p>
+        </header>
+
+        <section class="panel login-panel">
+            <div class="panel-head">
+                <h2>Sign in</h2>
+                <p>Login to place orders and view your pickup tokens.</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="row">
+                    <div class="field">
+                        <label for="loginId">Enrollment / Email</label>
+                        <input id="loginId" type="text" required placeholder="PU24BCA101 or name@poornima.edu">
+                    </div>
+                    <div class="field">
+                        <label for="loginPassword">Password</label>
+                        <input id="loginPassword" type="password" required placeholder="Enter password">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="field small">
+                        <label for="role">Role</label>
+                        <select id="role" required>
+                            <option value="">Select role</option>
+                            <option value="Student" selected>Student</option>
+                            <option value="Faculty">Faculty</option>
+                            <option value="Admin">Canteen Staff / Admin</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="rememberMe">Remember me</label>
+                        <div class="checkbox-wrap">
+                            <input id="rememberMe" type="checkbox">
+                            <span>Keep me signed in on this device</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row action-row">
+                    <button type="submit" class="primary-btn">Login</button>
+                    <a class="secondary-btn btn-link" href="signup.html">Create New Account</a>
+                </div>
+                <p id="loginMsg" class="login-help" style="color: red;"></p>
+                <p class="login-help">Forgot password? Visit the canteen desk or contact IT.</p>
+            </form>
+            <div class="row action-row">
+                <a class="secondary-btn btn-link" href="smartcanteen.html">Go to Main Page</a>
+            </div>
+        </section>
+    </main>
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const loginMsg = document.getElementById("loginMsg");
+        const submitBtn = loginForm.querySelector("button[type='submit']");
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const loginId = document.getElementById("loginId").value.trim();
+            const loginPassword = document.getElementById("loginPassword").value;
+            const role = document.getElementById("role").value;
+
+            if (!role) {
+                loginMsg.textContent = "Please select a role.";
+                return;
+            }
+
+            submitBtn.classList.add("btn-loading");
+
+            try {
+                const response = await fetch("http://localhost:3000/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ loginId, loginPassword, role })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem("smartCanteenToken", data.token);
+                    localStorage.setItem("smartCanteenUser", JSON.stringify(data.user));
+                    
+                    if (data.user && data.user.role === 'Admin') {
+                        window.location.href = "admin.html";
+                    } else {
+                        window.location.href = "smartcanteen.html";
+                    }
+                } else {
+                    loginMsg.textContent = data.error || "Login failed.";
+                }
+            } catch (error) {
+                loginMsg.textContent = "Network error or server down.";
+            } finally {
+                submitBtn.classList.remove("btn-loading");
+            }
+        });
+    </script>
+</body>
+</html>

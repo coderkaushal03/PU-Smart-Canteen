@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Canteen - Student Pre Order</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="topbar">
+        <img src="logo.svg" alt="Smart Canteen logo" class="logo">
+        <a class="topbar-link" id="authLink" href="./login.html">
+            <span class="topbar-link-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M12 3a5 5 0 0 1 5 5v2h1a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3h1V8a5 5 0 0 1 5-5Zm-3 7h6V8a3 3 0 0 0-6 0v2Z" />
+                </svg>
+            </span>
+            Login to Pre-Order
+        </a>
+    </div>
+    <main class="page">
+        <header class="hero">
+            <p class="badge">Poornima University - Smart Canteen</p>
+            <h1>Pre-order from class, collect at canteen counter</h1>
+            <p>
+                Students can place orders before break and directly collect food from the
+                <strong>Smart Canteen Pickup Counter</strong>. No long queue, faster service.
+            </p>
+            <div class="hero-points">
+                <span>1. Pick item</span>
+                <span>2. Add multiple items</span>
+                <span>3. Show token at counter</span>
+            </div>
+        </header>
+
+        <section class="panel best-sellers-panel">
+            <div class="panel-head">
+                <h2>Best Sellers 🔥</h2>
+                <p>Our most loved and frequently ordered items.</p>
+            </div>
+            <div id="bestSellersGrid" class="menu-grid"></div>
+        </section>
+
+        <section class="panel filter-panel">
+            <div class="search-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="searchInput" placeholder="Search for burgers, coffee, momos..." aria-label="Search menu">
+            </div>
+            <div class="category-chips" id="categoryChips">
+                <button class="chip active" data-category="All">All</button>
+                <button class="chip" data-category="Fast Food">Fast Food</button>
+                <button class="chip" data-category="Chinese">Chinese</button>
+                <button class="chip" data-category="Sandwich">Sandwich</button>
+                <button class="chip" data-category="Beverage">Beverages</button>
+                <button class="chip" data-category="Rolls">Rolls</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2>Popular Canteen Menu</h2>
+                <p>Menu designed from your canteen board. Tap any item to select it.</p>
+            </div>
+            <div id="menuGrid" class="menu-grid"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2>🍔 Track Your Orders Live</h2>
+                <p>Don't wait at the counter! We'll show you exactly when your food is ready.</p>
+            </div>
+            <ul id="ordersList" class="live-orders-list">
+                <!-- Javascript will inject graphical order progress here -->
+            </ul>
+        </section>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button id="cartFab" class="cart-fab" aria-label="Open Cart">
+        <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.2 9.4c-.1.6.4 1.2 1 1.2h14c.6 0 1.1-.6 1-1.2L17.5 13H7z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+        <span id="cartCountBadge" class="cart-badge">0</span>
+    </button>
+
+    <!-- Overlay & Side Drawer -->
+    <div id="drawerOverlay" class="drawer-overlay"></div>
+    <aside id="cartDrawer" class="cart-drawer">
+        <div class="drawer-header">
+            <h2>Your Cart</h2>
+            <button id="closeDrawerBtn" class="close-btn" aria-label="Close Cart">
+                <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <ul id="drawerCartList" class="cart-list"></ul>
+            <div id="drawerEmptyMsg" class="drawer-empty-msg">Your cart is empty.</div>
+        </div>
+        <form id="drawerCheckoutForm" class="drawer-footer">
+            <div class="drawer-field">
+                <label for="drawerPickupTime">Pickup Time</label>
+                <select id="drawerPickupTime" required>
+                    <option value="">Select pickup slot</option>
+                    <option value="As soon as possible" selected>As soon as possible</option>
+                    <option value="Next 10 minutes">Next 10 minutes</option>
+                    <option value="Next 20 minutes">Next 20 minutes</option>
+                    <option value="Lunch Break">Lunch Break</option>
+                </select>
+            </div>
+            <div class="drawer-field">
+                <input id="drawerNotes" type="text" placeholder="Cooking notes (optional)">
+            </div>
+            <div class="drawer-total-wrap">
+                <span>Total:</span>
+                <span id="drawerTotalBox">Rs 0</span>
+            </div>
+            <p id="drawerErrorMsg" class="drawer-error"></p>
+            <button type="submit" id="drawerCheckoutBtn" class="primary-btn">Pay via Wallet</button>
+        </form>
+    </aside>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <img src="logo.svg" alt="Smart Canteen logo" class="footer-logo">
+                <p class="footer-copy">© 2026 Smart Canteen. All rights reserved.</p>
+            </div>
+
+            <div class="footer-col">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Campus Partners</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Report an Issue</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Social Links</h3>
+                <div class="social-links">
+                    <a href="#" aria-label="Instagram" class="social-btn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zm5 5a5 5 0 1 0 .001 10.001A5 5 0 0 0 12 8zm6.2-.8a1.2 1.2 0 1 0-1.2 1.2 1.2 1.2 0 0 0 1.2-1.2z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Facebook" class="social-btn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 9.5V8c0-.7.5-1 1.1-1h1.4V4.2c-.8-.1-1.6-.2-2.4-.2-2.4 0-3.9 1.5-3.9 4.1v1.4H8v3h1.7V20h3.3v-7.5H15l.5-3z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Twitter" class="social-btn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 7.1c.6-.4 1-1 1.2-1.7-.6.3-1.2.5-1.9.6-.5-.6-1.3-1-2.2-1-1.7 0-3 1.4-3 3 0 .2 0 .5.1.7-2.5-.1-4.7-1.3-6.2-3.2-.3.5-.4 1-.4 1.6 0 1 .5 2 1.4 2.6-.5 0-1-.2-1.5-.4v.1c0 1.4 1 2.6 2.3 2.9-.3.1-.6.1-.9.1-.2 0-.4 0-.6-.1.4 1.2 1.5 2.1 2.9 2.1-1.1.9-2.4 1.3-3.8 1.3H4c1.4.9 3.1 1.4 4.9 1.4 5.8 0 9-4.9 9-9.1v-.4c.6-.4 1.1-.9 1.5-1.5z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-downloads">
+            <p>For a better experience, download the Smart Canteen app now.</p>
+            <div class="store-links">
+                <a href="#" class="store-badge" aria-label="Download on the App Store">
+                    <span class="badge-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16.7 13.1c0 2.4 2.1 3.2 2.1 3.3-.1.1-.3 1-1 2-.6.9-1.2 1.7-2.2 1.7s-1.3-.6-2.4-.6-1.5.6-2.4.6-1.5-.8-2.2-1.7c-1.2-1.6-2.2-4.6-0.9-6.6.7-1 1.8-1.6 3-1.6 1 0 1.9.7 2.4.7.5 0 1.5-.8 2.7-.7.5 0 2 .1 3 1.5-.1.1-1.8 1.1-1.8 3.4zM15.2 4.3c.5-.6.9-1.4.8-2.3-.7 0-1.6.5-2.1 1-.5.6-.9 1.4-.8 2.3.8.1 1.6-.4 2.1-1z"/>
+                        </svg>
+                    </span>
+                    <span>
+                        <small>Download on the</small>
+                        App Store
+                    </span>
+                </a>
+                <a href="#" class="store-badge" aria-label="Get it on Google Play">
+                    <span class="badge-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3.6 2.5c-.4.4-.6 1-.6 1.8v15.4c0 .8.2 1.4.6 1.8l10-10-10-10z" fill="#34a853"/>
+                            <path d="M14.3 12 3.6 22.5c.4.4 1 .6 1.8.3l11.9-6.9-3-3.9z" fill="#fbbc04"/>
+                            <path d="M21 12.3c.9-.5.9-1.4 0-1.9l-3.6-2.1-3.1 3.8 3 3.9 3.7-2.1z" fill="#4285f4"/>
+                            <path d="M17.4 8.2 5.4 1.2c-.7-.4-1.4-.2-1.8.3L14.3 12l3.1-3.8z" fill="#ea4335"/>
+                        </svg>
+                    </span>
+                    <span>
+                        <small>Get it on</small>
+                        Google Play
+                    </span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

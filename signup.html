@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Canteen - Create Account</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+    <div class="topbar">
+        <img src="logo.svg" alt="Smart Canteen logo" class="logo">
+    </div>
+    <main class="page">
+        <header class="hero">
+            <p class="badge">Poornima University - Smart Canteen</p>
+            <h1>Create your student account</h1>
+            <p>Register once to pre-order food and skip the queue at the canteen.</p>
+        </header>
+
+        <section class="panel login-panel">
+            <div class="panel-head">
+                <h2>New Account Details</h2>
+                <p>Fill in your academic details to activate login access.</p>
+            </div>
+            <form class="login-form">
+                <div class="row">
+                    <div class="field">
+                        <label for="fullName">Full Name</label>
+                        <input id="fullName" type="text" required placeholder="Enter your full name">
+                    </div>
+                    <div class="field">
+                        <label for="email">College Email</label>
+                        <input id="email" type="email" required placeholder="name@poornima.edu">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="field">
+                        <label for="enroll">Enrollment / Roll Number</label>
+                        <input id="enroll" type="text" required placeholder="PU24BCA101">
+                    </div>
+                    <div class="field">
+                        <label for="department">Department</label>
+                        <input id="department" type="text" required placeholder="BCA / CSE / ECE">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="field">
+                        <label for="createPassword">Create Password</label>
+                        <input id="createPassword" type="password" required placeholder="Minimum 8 characters">
+                    </div>
+                    <div class="field">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input id="confirmPassword" type="password" required placeholder="Re-enter password">
+                    </div>
+                </div>
+
+                <div class="row action-row">
+                    <button type="submit" class="primary-btn">Create Account</button>
+                    <a class="secondary-btn btn-link" href="login.html">Back to Login</a>
+                </div>
+                <p id="signupMsg" class="login-help" style="color: red;"></p>
+                <p class="login-help">By creating an account, you agree to campus canteen guidelines.</p>
+            </form>
+        </section>
+    </main>
+    <script>
+        const signupForm = document.querySelector(".login-form");
+        const submitBtn = signupForm.querySelector("button[type='submit']");
+        
+        signupForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById("fullName").value.trim();
+            const enroll = document.getElementById("enroll").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("createPassword").value;
+            const confirm = document.getElementById("confirmPassword").value;
+            const msg = document.getElementById("signupMsg");
+            
+            if (password !== confirm) {
+                msg.textContent = "Passwords do not match.";
+                submitBtn.classList.remove("btn-loading");
+                return;
+            }
+
+            submitBtn.classList.add("btn-loading");
+            msg.textContent = "";
+
+            try {
+                const response = await fetch("http://localhost:3000/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        signupName: fullName,
+                        signupId: enroll,
+                        signupEmail: email,
+                        signupPassword: password,
+                        signupRole: "Student"
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    msg.style.color = "green";
+                    msg.textContent = "Account created successfully! Redirecting to login...";
+                    setTimeout(() => window.location.href = "login.html", 1500);
+                } else {
+                    msg.style.color = "red";
+                    msg.textContent = data.error || "Failed to register";
+                    submitBtn.classList.remove("btn-loading");
+                }
+            } catch (error) {
+                msg.style.color = "red";
+                msg.textContent = "Network error or server is down.";
+                submitBtn.classList.remove("btn-loading");
+            }
+        });
+    </script>
+</body>
+</html>

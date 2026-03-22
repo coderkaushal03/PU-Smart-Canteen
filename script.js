@@ -45,13 +45,34 @@ async function renderMenu() {
             if (response.ok) {
                 allMenuItems = await response.json();
                 filterAndDisplay();
+            } else {
+                loadFallbackMenu();
             }
         } catch (e) {
-            console.error("Failed to fetch menu items:", e);
+            // Backend not running (e.g., GitHub Pages) — use static fallback
+            loadFallbackMenu();
         }
     } else {
-        filterAndDisplay(); // If already fetched, just filter and display
+        filterAndDisplay();
     }
+}
+
+function loadFallbackMenu() {
+    allMenuItems = [
+        { id:1, name:"Burger", category:"Fast Food", price:35, is_best_seller:1, description:"A classic crispy aloo tikki burger with fresh veggies and our special house sauce.", image:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80" },
+        { id:2, name:"Samosa", category:"Fast Food", price:15, is_best_seller:0, description:"Hot perfectly spiced potato and pea samosa. Served with tangy tamarind chutney.", image:"https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80" },
+        { id:3, name:"Noodles", category:"Chinese", price:50, is_best_seller:0, description:"Wok-tossed Hakka noodles with crunchy cabbage, bell peppers, and savory soy sauce.", image:"https://upload.wikimedia.org/wikipedia/commons/1/13/A_bowl_of_Spring_noodles_soup.jpg" },
+        { id:4, name:"Hot Dog", category:"Fast Food", price:35, is_best_seller:0, description:"Grilled sausage inside a soft bun, topped with classic mustard and ketchup.", image:"https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=900&q=80" },
+        { id:5, name:"French Fries", category:"Fast Food", price:30, is_best_seller:0, description:"Crispy golden french fries seasoned with a touch of salt.", image:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=900&q=80" },
+        { id:6, name:"Aloo Sandwich", category:"Sandwich", price:30, is_best_seller:0, description:"Grilled sandwich filled with hearty spiced potatoes, onions, and coriander.", image:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=80" },
+        { id:7, name:"Corn Sandwich", category:"Sandwich", price:40, is_best_seller:0, description:"Toasted sandwich loaded with sweet corn, cheese, and mild spices.", image:"https://upload.wikimedia.org/wikipedia/commons/4/48/Toasted_ham_sandwich.jpg" },
+        { id:8, name:"Cheese Sandwich", category:"Sandwich", price:45, is_best_seller:0, description:"Melted cheese goodness inside perfectly buttered and toasted bread slices.", image:"https://images.unsplash.com/photo-1528736235302-52922df5c122?auto=format&fit=crop&w=900&q=80" },
+        { id:9, name:"Cold Coffee", category:"Cold Beverage", price:40, is_best_seller:1, description:"Thick, sweet, and creamy chilled coffee blended to perfection.", image:"https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=900&q=80" },
+        { id:10, name:"Diet Coke", category:"Cold Beverage", price:30, is_best_seller:0, description:"Refreshing zero-sugar carbonated beverage served chilled.", image:"https://upload.wikimedia.org/wikipedia/commons/3/3c/Diet-Coke-Can.jpg" },
+        { id:11, name:"Steam Momos (6pc)", category:"Chinese", price:40, is_best_seller:1, description:"Soft steamed momos stuffed with finely minced vegetables. Served with spicy red chutney.", image:"https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=900&q=80" },
+        { id:12, name:"Spring Roll", category:"Rolls", price:60, is_best_seller:1, description:"Crispy fried rolls filled with fresh julienned vegetables and noodles.", image:"https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=900&q=80" }
+    ];
+    filterAndDisplay();
 }
 
 function filterAndDisplay() {

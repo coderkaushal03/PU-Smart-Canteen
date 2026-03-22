@@ -30,6 +30,15 @@ body {
     padding: 28px;
 }
 
+/* ==============================
+   MOBILE VIEWPORT FIX
+============================== */
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+    }
+}
+
 .topbar {
     width: min(1100px, 100%);
     margin: 0 auto 12px;
@@ -511,19 +520,169 @@ input[readonly] {
     padding: 10px;
 }
 
-@media (max-width: 680px) {
-    body {
-        padding: 12px;
+/* ==============================
+   RESPONSIVE — TABLET (≤760px)
+============================== */
+@media (max-width: 760px) {
+    body { padding: 14px; }
+
+    .logo { width: 110px; }
+
+    /* Topbar: stack logo + auth vertically on tiny screens */
+    .topbar {
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
-    .hero,
-    .panel {
-        padding: 14px;
+    /* Shrink auth pills on mobile */
+    .user-auth-badge {
+        height: 34px;
+        padding: 0 10px;
+        font-size: 0.8rem;
     }
 
-    .menu-card img {
-        height: 120px;
+    .auth-controls { gap: 6px; }
+
+    /* Login to Pre-Order button */
+    .topbar-link {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+        gap: 6px;
     }
+    .topbar-link-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* Hero */
+    .hero {
+        padding: 18px 14px;
+    }
+    .hero h1 {
+        font-size: clamp(1.3rem, 6vw, 2rem);
+    }
+    .hero-points {
+        gap: 6px;
+    }
+    .hero-points span {
+        font-size: 0.8rem;
+        padding: 5px 8px;
+    }
+
+    /* Menu grid: 2 columns on tablet */
+    .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .panel, .hero { padding: 14px; }
+
+    /* Footer */
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Cart drawer full-width */
+    .cart-drawer {
+        max-width: 100%;
+        right: -105%;
+    }
+}
+
+/* ==============================
+   RESPONSIVE — MOBILE (≤480px)
+============================== */
+@media (max-width: 480px) {
+    body { padding: 10px; }
+
+    /* Topbar: logo left, auth right, no wrap */
+    .topbar {
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .logo { width: 90px; }
+
+    /* Hide wallet pill on mobile, keep only welcome + logout */
+    .wallet-pill {
+        display: none;
+    }
+
+    /* Shrink pills more */
+    .user-auth-badge {
+        height: 32px;
+        padding: 0 8px;
+        font-size: 0.75rem;
+    }
+    .auth-controls { gap: 4px; }
+
+    /* Login button compact */
+    .topbar-link {
+        padding: 7px 10px;
+        font-size: 0.82rem;
+        gap: 6px;
+    }
+
+    /* Hero */
+    .hero { padding: 16px 12px; }
+    .hero h1 { font-size: clamp(1.2rem, 7vw, 1.6rem); }
+    .badge { font-size: 0.76rem; padding: 4px 10px; }
+
+    /* Menu: single column on small phones */
+    .menu-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .menu-card .menu-img-wrap { height: 110px; }
+    .menu-body { padding: 8px; }
+    .menu-body h3 { font-size: 0.92rem; }
+    .menu-cat { font-size: 0.72rem; }
+    .menu-price { font-size: 0.9rem; }
+    .pick-btn { padding: 8px; font-size: 0.82rem; }
+
+    /* Panels */
+    .panel { padding: 12px; border-radius: 14px; }
+    .panel-head h2 { font-size: 1.05rem; }
+
+    /* Category chips smaller */
+    .chip { padding: 6px 12px; font-size: 0.82rem; }
+
+    /* Search bar */
+    .search-wrap input { font-size: 0.92rem; padding: 11px 14px 11px 42px; }
+
+    /* Cart drawer full width */
+    .cart-drawer { max-width: 100%; right: -105%; }
+    .drawer-header { padding: 16px; }
+    .drawer-body { padding: 16px; }
+    .drawer-footer { padding: 16px; }
+
+    /* Footer */
+    .footer-grid { grid-template-columns: 1fr; gap: 16px; }
+    .footer-downloads { flex-direction: column; align-items: flex-start; }
+    .store-badge { min-width: unset; width: 100%; }
+    .site-footer { padding: 16px; border-radius: 14px; }
+
+    /* Toast bottom-left on mobile so it doesn't hide the FAB */
+    .toast-popup {
+        left: 12px;
+        right: 12px;
+        bottom: 100px;
+        font-size: 0.9rem;
+        padding: 12px 16px;
+    }
+
+    /* Progress bar labels smaller */
+    .step-label { font-size: 0.68rem; }
+    .step { width: 48px; }
+    .token-badge { font-size: 0.9rem; }
+    .order-amount { font-size: 0.9rem; }
+
+    /* Action row stack */
+    .action-row { grid-template-columns: 1fr; }
+
+    /* Login form fields */
+    .row { grid-template-columns: 1fr; }
 }
 
 .action-row {

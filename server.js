@@ -232,8 +232,9 @@ app.put('/api/admin/orders/:id/status', authenticateToken, isAdmin, async (req, 
 // Initialize DB and start server
 setupDatabase().then((database) => {
     db = database;
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
         console.log(`Server is running on http://localhost:${PORT}`);
+        console.log(`On your phone, use: http://192.168.29.241:${PORT}`);
     });
 }).catch(err => {
     console.error('Failed to initialize database', err);

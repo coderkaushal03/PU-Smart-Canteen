@@ -4,7 +4,7 @@ let searchQuery = "";
 
 // Auto-detect server address: use Mac's LAN IP when accessed from phone, localhost when on the same machine
 const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-    ? "${API_BASE}"
+    ? "http://localhost:3000"
     : "http://192.168.29.241:3000";
 
 
@@ -47,7 +47,7 @@ async function renderMenu() {
     // Fetch menu items only once
     if (allMenuItems.length === 0) {
         try {
-            const response = await fetch("${API_BASE}/api/menu");
+            const response = await fetch(`${API_BASE}/api/menu`);
             if (response.ok) {
                 allMenuItems = await response.json();
                 filterAndDisplay();
@@ -275,7 +275,7 @@ async function renderOrders() {
         const tokenCache = localStorage.getItem("smartCanteenToken");
         if(!tokenCache) return;
 
-        const response = await fetch("${API_BASE}/api/orders", {
+        const response = await fetch(`${API_BASE}/api/orders`, {
             headers: { "Authorization": `Bearer ${tokenCache}` }
         });
 
@@ -348,7 +348,7 @@ async function checkAuthStatus() {
     
     if (token && authLink) {
         try {
-            const response = await fetch("${API_BASE}/api/auth/me", {
+            const response = await fetch(`${API_BASE}/api/auth/me`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (response.ok) {
@@ -479,7 +479,7 @@ if (drawerCheckoutForm) {
 
             const cartTotalCost = cart.reduce((acc, curr) => acc + curr.subtotal, 0);
             
-            const response = await fetch("${API_BASE}/api/orders", {
+            const response = await fetch(`${API_BASE}/api/orders`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",

@@ -293,7 +293,7 @@ async function renderOrders() {
                 return;
             }
 
-            orders.slice(0, 4).forEach((order) => {
+            orders.slice(0, 1).forEach((order) => {
                 const li = document.createElement("li");
                 li.className = "order-item-card";
 

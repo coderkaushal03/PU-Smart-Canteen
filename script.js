@@ -339,6 +339,109 @@ async function renderOrders() {
 }
 setInterval(renderOrders, 5000);
 
+// --- Order History & Invoice System ---
+async function renderOrderHistory() {
+    const historyList = document.getElementById("orderHistoryList");
+    if (!historyList) return;
+
+    const token = localStorage.getItem("smartCanteenToken");
+    if (!token) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/orders`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            const orders = await response.json();
+            if (orders.length === 0) {
+                historyList.innerHTML = `<p style="padding: 20px; text-align: center; color: var(--muted);">No previous orders found.</p>`;
+                return;
+            }
+
+            historyList.innerHTML = "";
+            orders.forEach(order => {
+                const card = document.createElement("div");
+                card.className = "history-card";
+                
+                const date = new Date(order.created_at).toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                let summary = "";
+                if (Array.isArray(order.items)) {
+                    summary = order.items.map(i => `${i.qty}x ${i.item_name}`).join(", ");
+                }
+
+                card.innerHTML = `
+                    <div class="h-info">
+                        <h4>Token: ${order.token}</h4>
+                        <p>${summary}</p>
+                        <p>${date} • Total: Rs ${order.total}</p>
+                    </div>
+                    <div class="h-actions">
+                        <button class="btn-inv" onclick='viewInvoice(${JSON.stringify(order).replace(/'/g, "&apos;")})'>Invoice</button>
+                        <button class="btn-re" onclick='reorder(${JSON.stringify(order.items).replace(/'/g, "&apos;")})'>Re-order</button>
+                    </div>
+                `;
+                historyList.appendChild(card);
+            });
+        }
+    } catch (e) { console.error("History fetch error:", e); }
+}
+
+function reorder(items) {
+    if (!items || !Array.isArray(items)) return;
+    
+    // Clear current cart first? Or append? Let's append but check availability
+    items.forEach(oldItem => {
+        // Try to find the item in current menu to get latest price/image
+        const menuItem = allMenuItems.find(m => m.name === oldItem.item_name);
+        if (menuItem) {
+            addItemToCartDirectly(menuItem.name, oldItem.qty);
+        } else {
+            showToast(`Note: ${oldItem.item_name} is no longer on the menu.`);
+        }
+    });
+
+    showToast("Items added to your cart!");
+    toggleDrawer(); // Open drawer so they can see
+}
+
+function viewInvoice(order) {
+    const modal = document.getElementById("invoiceModal");
+    if (!modal) return;
+
+    document.getElementById("invoiceToken").textContent = order.token;
+    document.getElementById("invoiceTotal").textContent = `Rs ${order.total}`;
+    document.getElementById("invoiceDate").textContent = new Date(order.created_at).toLocaleString();
+
+    const itemsList = document.getElementById("invoiceItems");
+    itemsList.innerHTML = "";
+    
+    if (order.items) {
+        order.items.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "inv-item";
+            row.innerHTML = `
+                <span>${item.qty}x ${item.item_name}</span>
+                <span>Rs ${item.price * item.qty}</span>
+            `;
+            itemsList.appendChild(row);
+        });
+    }
+
+    modal.classList.add("active");
+}
+
+const closeInvoiceBtn = document.getElementById("closeInvoiceBtn");
+if (closeInvoiceBtn) {
+    closeInvoiceBtn.addEventListener("click", () => {
+        document.getElementById("invoiceModal").classList.remove("active");
+    });
+}
+// ---------------------------------------
+
 cart = loadCart();
 
 // Legacy form listeners removed for V2 Drawer UX
@@ -375,6 +478,7 @@ async function checkAuthStatus() {
                     localStorage.removeItem("smartCanteenUser");
                     window.location.reload();
                 });
+                renderOrderHistory(); // Load history on login
             } else {
                 localStorage.removeItem("smartCanteenToken");
             }

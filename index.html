@@ -9,7 +9,9 @@
 </head>
 <body>
     <div class="topbar">
-        <img src="logo.svg" alt="Smart Canteen logo" class="logo">
+        <a href="index.html" class="logo-link" aria-label="Smart Canteen Home">
+            <img src="logo.svg" alt="Smart Canteen logo" class="logo">
+        </a>
         <a class="topbar-link" id="authLink" href="./login.html">
             <span class="topbar-link-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" role="img" focusable="false">
@@ -73,6 +75,16 @@
             <ul id="ordersList" class="live-orders-list">
                 <!-- Javascript will inject graphical order progress here -->
             </ul>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2>🕒 Order History</h2>
+                <p>View your past orders, re-order your favorites, and get invoices.</p>
+            </div>
+            <div id="orderHistoryList" class="history-grid">
+                <p style="padding: 20px; text-align: center; color: var(--muted);">No previous orders found.</p>
+            </div>
         </section>
     </main>
 
@@ -190,6 +202,35 @@
             </div>
         </div>
     </footer>
+
+    <div id="invoiceModal" class="modal-overlay">
+        <div class="modal-content invoice-card">
+            <button class="close-modal" id="closeInvoiceBtn">&times;</button>
+            <div class="invoice-header">
+                <h3>Transaction Receipt</h3>
+                <p id="invoiceDate"></p>
+            </div>
+            <div class="invoice-body">
+                <div class="invoice-row main-info">
+                    <span>Order Token:</span>
+                    <strong id="invoiceToken"></strong>
+                </div>
+                <hr>
+                <div id="invoiceItems" class="invoice-items-list">
+                    <!-- Items go here -->
+                </div>
+                <hr>
+                <div class="invoice-total-row">
+                    <span>Grand Total</span>
+                    <strong id="invoiceTotal"></strong>
+                </div>
+            </div>
+            <div class="invoice-footer">
+                <p>Thank you for dining with us!</p>
+                <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

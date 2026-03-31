@@ -12,8 +12,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_key_smart_canteen
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend static files
-app.use(express.static(path.join(__dirname)));
+// Serve frontend static files (Only used for local development)
+if (!process.env.VERCEL) {
+    app.use(express.static(path.join(__dirname)));
+}
 
 // Authentication Middleware
 const authenticateToken = (req, res, next) => {

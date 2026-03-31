@@ -226,6 +226,15 @@ app.put('/api/admin/orders/:id/status', authenticateToken, isAdmin, async (req, 
     }
 });
 
+
+// Fallback to serve index.html for any non-API routes (Vercel Root Fix)
+app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Initialize DB and start server
 setupDatabase().then(() => {
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {

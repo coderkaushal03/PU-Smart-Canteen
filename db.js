@@ -1,15 +1,14 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
-const path = require('path');
+const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 
 // Configure database connection
-async function getDbConnection() {
-    return open({
-        filename: path.join(__dirname, 'database.sqlite'),
-        driver: sqlite3.Database
-    });
-}
+// In Vercel, we use process.env.DATABASE_URL
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false // Required for Neon/Supabase
+    }
+});
 
 const menuItemsSeed = [
     {
@@ -100,90 +99,91 @@ const menuItemsSeed = [
 
 // Initialize database schema
 async function setupDatabase() {
-    const db = await getDbConnection();
-    
-    // Create Users table with wallet balance
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            enrollment TEXT,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT DEFAULT 'Student',
-            balance INTEGER DEFAULT 500,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-    `);
+    const client = await pool.connect();
+    try {
+        // Create Users table
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name TEXT,
+                enrollment TEXT,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT DEFAULT 'Student',
+                balance INTEGER DEFAULT 500,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
 
-    // Seed Users if empty
-    const { count: uCount } = await db.get('SELECT COUNT(*) as count FROM users');
-    if (uCount === 0) {
-        console.log("Seeding test users...");
-        const stmt = await db.prepare('INSERT INTO users (name, enrollment, email, password, role, balance) VALUES (?, ?, ?, ?, ?, ?)');
-        const hashedPw = await bcrypt.hash("password123", 10);
-        await stmt.run("Test Student", "TEST1234", "student@test.com", hashedPw, "Student", 1000);
-        await stmt.run("Canteen Admin", "ADMIN001", "admin@test.com", hashedPw, "Admin", 9999);
-        await stmt.finalize();
-        console.log("Users seeded successfully.");
-    }
-
-    // Create Menu Items table - added description and best_seller flag
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS menu_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            category TEXT NOT NULL,
-            price INTEGER NOT NULL,
-            image TEXT NOT NULL,
-            description TEXT,
-            is_best_seller INTEGER DEFAULT 0
-        );
-    `);
-    // Create Orders table
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS orders (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            token TEXT NOT NULL,
-            pickup_time TEXT NOT NULL,
-            notes TEXT,
-            total INTEGER NOT NULL,
-            status TEXT DEFAULT 'Pending',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        );
-    `);
-
-    // Create Order Items table
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS order_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            order_id INTEGER NOT NULL,
-            item_name TEXT NOT NULL,
-            qty INTEGER NOT NULL,
-            price INTEGER NOT NULL,
-            FOREIGN KEY (order_id) REFERENCES orders (id)
-        );
-    `);
-
-    // Seed Menu Items if empty
-    const { count } = await db.get('SELECT COUNT(*) as count FROM menu_items');
-    if (count === 0) {
-        console.log("Seeding menu items...");
-        const stmt = await db.prepare('INSERT INTO menu_items (name, category, price, image, description, is_best_seller) VALUES (?, ?, ?, ?, ?, ?)');
-        for (const item of menuItemsSeed) {
-            const isBest = ['Burger', 'Cold Coffee', 'Spring Roll', 'Steam Momos (6pc)'].includes(item.name) ? 1 : 0;
-            await stmt.run(item.name, item.category, item.price, item.image, item.description, isBest);
+        // Seed Users if empty
+        const { rows: uRows } = await client.query('SELECT COUNT(*) as count FROM users');
+        if (parseInt(uRows[0].count) === 0) {
+            console.log("Seeding test users...");
+            const hashedPw = await bcrypt.hash("password123", 10);
+            await client.query('INSERT INTO users (name, enrollment, email, password, role, balance) VALUES ($1, $2, $3, $4, $5, $6)', 
+                ["Test Student", "TEST1234", "student@test.com", hashedPw, "Student", 1000]);
+            await client.query('INSERT INTO users (name, enrollment, email, password, role, balance) VALUES ($1, $2, $3, $4, $5, $6)', 
+                ["Canteen Admin", "ADMIN001", "admin@test.com", hashedPw, "Admin", 9999]);
         }
-        await stmt.finalize();
-        console.log("Menu items seeded successfully.");
-    }
 
-    return db;
+        // Create Menu Items table
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS menu_items (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                price INTEGER NOT NULL,
+                image TEXT NOT NULL,
+                description TEXT,
+                is_best_seller INTEGER DEFAULT 0
+            );
+        `);
+
+        // Create Orders table
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS orders (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                token TEXT NOT NULL,
+                pickup_time TEXT NOT NULL,
+                notes TEXT,
+                total INTEGER NOT NULL,
+                status TEXT DEFAULT 'Pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // Create Order Items table
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS order_items (
+                id SERIAL PRIMARY KEY,
+                order_id INTEGER NOT NULL REFERENCES orders(id),
+                item_name TEXT NOT NULL,
+                qty INTEGER NOT NULL,
+                price INTEGER NOT NULL
+            );
+        `);
+
+        // Seed Menu Items if empty
+        const { rows: mRows } = await client.query('SELECT COUNT(*) as count FROM menu_items');
+        if (parseInt(mRows[0].count) === 0) {
+            console.log("Seeding menu items...");
+            for (const item of menuItemsSeed) {
+                const isBest = ['Burger', 'Cold Coffee', 'Spring Roll', 'Steam Momos (6pc)'].includes(item.name) ? 1 : 0;
+                await client.query('INSERT INTO menu_items (name, category, price, image, description, is_best_seller) VALUES ($1, $2, $3, $4, $5, $6)', 
+                    [item.name, item.category, item.price, item.image, item.description, isBest]);
+            }
+        }
+        
+        console.log("Database initialized successfully.");
+    } catch (err) {
+        console.error("Database setup error:", err);
+    } finally {
+        client.release();
+    }
 }
 
 module.exports = {
-    getDbConnection,
+    pool,
     setupDatabase
 };

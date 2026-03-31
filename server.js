@@ -12,6 +12,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_key_smart_canteen
 app.use(cors());
 app.use(express.json());
 
+// Root route to serve index.html (Ensures / works on Vercel)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Serve frontend static files from the 'public' directory (Only for local dev)
 if (!process.env.VERCEL) {
     app.use(express.static(path.join(__dirname, 'public')));

@@ -339,55 +339,81 @@ async function renderOrders() {
 }
 setInterval(renderOrders, 5000);
 
+let allHistoryOrders = [];
+let showAllHistory = false;
+
 // --- Order History & Invoice System ---
 async function renderOrderHistory() {
     const historyList = document.getElementById("orderHistoryList");
+    const btnLoadMore = document.getElementById("btnLoadMore");
     if (!historyList) return;
 
     const token = localStorage.getItem("smartCanteenToken");
     if (!token) return;
 
     try {
-        const response = await fetch(`${API_BASE}/api/orders`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+        if (allHistoryOrders.length === 0) {
+            const response = await fetch(`${API_BASE}/api/orders`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
 
-        if (response.ok) {
-            const orders = await response.json();
-            if (orders.length === 0) {
-                historyList.innerHTML = `<p style="padding: 20px; text-align: center; color: var(--muted);">No previous orders found.</p>`;
-                return;
+            if (response.ok) {
+                allHistoryOrders = await response.json();
+            }
+        }
+
+        if (allHistoryOrders.length === 0) {
+            historyList.innerHTML = `<p style="padding: 20px; text-align: center; color: var(--muted);">No previous orders found.</p>`;
+            if (btnLoadMore) btnLoadMore.classList.add("hidden");
+            return;
+        }
+
+        const displayOrders = showAllHistory ? allHistoryOrders : allHistoryOrders.slice(0, 3);
+        
+        if (btnLoadMore) {
+            if (allHistoryOrders.length > 3 && !showAllHistory) {
+                btnLoadMore.classList.remove("hidden");
+            } else {
+                btnLoadMore.classList.add("hidden");
+            }
+        }
+
+        historyList.innerHTML = "";
+        displayOrders.forEach(order => {
+            const card = document.createElement("div");
+            card.className = "history-card";
+            
+            const date = new Date(order.created_at).toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            let summary = "";
+            if (Array.isArray(order.items)) {
+                summary = order.items.map(i => `${i.qty}x ${i.item_name}`).join(", ");
             }
 
-            historyList.innerHTML = "";
-            orders.forEach(order => {
-                const card = document.createElement("div");
-                card.className = "history-card";
-                
-                const date = new Date(order.created_at).toLocaleDateString('en-IN', {
-                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
-
-                let summary = "";
-                if (Array.isArray(order.items)) {
-                    summary = order.items.map(i => `${i.qty}x ${i.item_name}`).join(", ");
-                }
-
-                card.innerHTML = `
-                    <div class="h-info">
-                        <h4>Token: ${order.token}</h4>
-                        <p>${summary}</p>
-                        <p>${date} • Total: Rs ${order.total}</p>
-                    </div>
-                    <div class="h-actions">
-                        <button class="btn-inv" onclick='viewInvoice(${JSON.stringify(order).replace(/'/g, "&apos;")})'>Invoice</button>
-                        <button class="btn-re" onclick='reorder(${JSON.stringify(order.items).replace(/'/g, "&apos;")})'>Re-order</button>
-                    </div>
-                `;
-                historyList.appendChild(card);
-            });
-        }
+            card.innerHTML = `
+                <div class="h-info">
+                    <h4>Token: ${order.token}</h4>
+                    <p>${summary}</p>
+                    <p>${date} • Total: Rs ${order.total}</p>
+                </div>
+                <div class="h-actions">
+                    <button class="btn-inv" onclick='viewInvoice(${JSON.stringify(order).replace(/'/g, "&apos;")})'>Invoice</button>
+                    <button class="btn-re" onclick='reorder(${JSON.stringify(order.items).replace(/'/g, "&apos;")})'>Re-order</button>
+                </div>
+            `;
+            historyList.appendChild(card);
+        });
     } catch (e) { console.error("History fetch error:", e); }
+}
+
+const btnLoadMore = document.getElementById("btnLoadMore");
+if (btnLoadMore) {
+    btnLoadMore.addEventListener("click", () => {
+        showAllHistory = true;
+        renderOrderHistory();
+    });
 }
 
 function reorder(items) {

@@ -1611,3 +1611,33 @@ input[readonly] {
     }
     .close-modal, .btn-print { display: none !important; }
 }
+
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-load-more {
+    background: transparent;
+    border: 1px solid var(--brand);
+    color: var(--brand);
+    padding: 10px 24px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-load-more:hover {
+    background: var(--brand);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(47, 110, 90, 0.2);
+}
+
+.btn-load-more.hidden {
+    display: none;
+}
+

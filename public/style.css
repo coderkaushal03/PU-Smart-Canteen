@@ -86,11 +86,12 @@ body {
 }
 
 .traffic-dot {
+    --traffic-color: #22c55e;
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #22c55e;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    background: var(--traffic-color);
+    box-shadow: 0 0 0 0 var(--traffic-color);
     animation: trafficPulse 1.8s ease-out infinite;
 }
 
@@ -101,13 +102,13 @@ body {
 
 @keyframes trafficPulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+        box-shadow: 0 0 0 0 var(--traffic-color);
     }
     70% {
-        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+        box-shadow: 0 0 0 8px transparent;
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+        box-shadow: 0 0 0 0 transparent;
     }
 }
 

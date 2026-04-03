@@ -647,3 +647,26 @@ if (drawerCheckoutForm) {
         }
     });
 }
+
+// Live Traffic Logic
+async function fetchTraffic() {
+    const trafficDot = document.getElementById("trafficDot");
+    const trafficText = document.getElementById("trafficText");
+    if (!trafficDot || !trafficText) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/traffic`);
+        if (response.ok) {
+            const data = await response.json();
+            trafficText.textContent = data.level; // e.g., Low, Moderate, High
+            trafficDot.style.setProperty('--traffic-color', data.color);
+        }
+    } catch (e) {
+        console.error("Failed to fetch traffic:", e);
+        trafficText.textContent = "Unknown";
+    }
+}
+// Start tracking traffic immediately and update every 15 seconds
+fetchTraffic();
+setInterval(fetchTraffic, 15000);
+

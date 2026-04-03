@@ -184,6 +184,28 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
     }
 });
 
+app.get('/api/traffic', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT COUNT(*) FROM orders WHERE status IN ('Pending', 'Preparing')");
+        const count = parseInt(result.rows[0].count);
+        let level = 'Low';
+        let color = '#22c55e'; // Green
+        
+        if (count >= 10) {
+            level = 'High';
+            color = '#ef4444'; // Red
+        } else if (count >= 5) {
+            level = 'Moderate';
+            color = '#f59e0b'; // Orange
+        } 
+        
+        res.json({ count, level, color });
+    } catch (error) {
+        console.error('Traffic Error:', error);
+        res.status(500).json({ error: 'Failed to fetch traffic' });
+    }
+});
+
 // --- ADMIN ROUTES ---
 const isAdmin = async (req, res, next) => {
     try {

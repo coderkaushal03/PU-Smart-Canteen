@@ -48,7 +48,8 @@ body {
     gap: 14px;
 }
 
-.order-topbar {
+.order-topbar,
+.index-topbar {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;

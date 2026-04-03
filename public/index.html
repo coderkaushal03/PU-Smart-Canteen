@@ -8,10 +8,14 @@
     <link rel="icon" href="favicon.png" type="image/png">
 </head>
 <body>
-    <div class="topbar">
+    <div class="topbar index-topbar">
         <a href="index.html" class="logo-link" aria-label="Smart Canteen Home">
             <img src="logo.svg" alt="Smart Canteen logo" class="logo">
         </a>
+        <div class="traffic-indicator" aria-live="polite">
+            <span id="trafficDot" class="traffic-dot" aria-hidden="true"></span>
+            Live traffic: <span id="trafficText">Calculating...</span>
+        </div>
         <a class="topbar-link" id="authLink" href="./login.html">
             <span class="topbar-link-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" role="img" focusable="false">

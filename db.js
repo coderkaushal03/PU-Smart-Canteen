@@ -11,90 +11,28 @@ const pool = new Pool({
 });
 
 const menuItemsSeed = [
-    {
-        name: "Burger",
-        category: "Fast Food",
-        price: 35,
-        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80",
-        description: "A classic crispy aloo tikki burger with fresh veggies and our special house sauce."
-    },
-    {
-        name: "Samosa",
-        category: "Fast Food",
-        price: 15,
-        image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80",
-        description: "Hot perfectly spiced potato and pea samosa. Served with tangy tamarind chutney."
-    },
-    {
-        name: "Noodles",
-        category: "Chinese",
-        price: 50,
-        image: "https://upload.wikimedia.org/wikipedia/commons/1/13/A_bowl_of_Spring_noodles_soup.jpg",
-        description: "Wok-tossed Hakka noodles with crunchy cabbage, bell peppers, and savory soy sauce."
-    },
-    {
-        name: "Hot Dog",
-        category: "Fast Food",
-        price: 35,
-        image: "https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=900&q=80",
-        description: "Grilled sausage inside a soft bun, topped with classic mustard and ketchup."
-    },
-    {
-        name: "French Fries",
-        category: "Chinese/Fast Food",
-        price: 30,
-        image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=900&q=80",
-        description: "Crispy golden french fries seasoned with a touch of salt. Perfectly irresistible."
-    },
-    {
-        name: "Aloo Sandwich",
-        category: "Sandwich",
-        price: 30,
-        image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=80",
-        description: "Grilled sandwich filled with hearty spiced potatoes, onions, and coriander."
-    },
-    {
-        name: "Corn Sandwich",
-        category: "Sandwich",
-        price: 40,
-        image: "https://upload.wikimedia.org/wikipedia/commons/4/48/Toasted_ham_sandwich.jpg",
-        description: "Toasted sandwich loaded with sweet corn, cheese, and mild spices."
-    },
-    {
-        name: "Cheese Sandwich",
-        category: "Sandwich",
-        price: 45,
-        image: "https://images.unsplash.com/photo-1528736235302-52922df5c122?auto=format&fit=crop&w=900&q=80",
-        description: "Melted cheese goodness inside perfectly buttered and toasted bread slices."
-    },
-    {
-        name: "Cold Coffee",
-        category: "Cold Beverage",
-        price: 40,
-        image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=900&q=80",
-        description: "Thick, sweet, and creamy chilled coffee blended to perfection."
-    },
-    {
-        name: "Diet Coke",
-        category: "Cold Beverage",
-        price: 30,
-        image: "https://upload.wikimedia.org/wikipedia/commons/3/3c/Diet-Coke-Can.jpg",
-        description: "Refreshing zero-sugar carbonated beverage served chilled."
-    },
-    {
-        name: "Steam Momos (6pc)",
-        category: "Chinese",
-        price: 40,
-        image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=900&q=80",
-        description: "Soft steamed momos stuffed with finely minced vegetables. Served with spicy red chutney."
-    },
-    {
-        name: "Spring Roll",
-        category: "Rolls",
-        price: 60,
-        image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=900&q=80",
-        description: "Crispy fried rolls filled with fresh julienned vegetables and noodles."
-    }
+    // PU Canteen
+    { name: "Chocolate Cheese Sandwich", category: "Sandwich", price: 50, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1528736235302-52922df5c122?auto=format&fit=crop&w=800&q=80", description: "Sweet and savory chocolate cheese sandwich." },
+    { name: "Aloo Bhujia Grilled Sandwich", category: "Sandwich", price: 30, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80", description: "Spicy aloo bhujia mix grilled to perfection." },
+    { name: "Schezwan Grilled Sandwich", category: "Sandwich", price: 30, outlet: "PU Canteen", image: "https://upload.wikimedia.org/wikipedia/commons/4/48/Toasted_ham_sandwich.jpg", description: "Spicy schezwan sauce loaded sandwich." },
+    { name: "Paneer Puff", category: "Bakery", price: 40, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80", description: "Flaky puff pastry stuffed with spiced paneer." },
+    { name: "Spring Roll", category: "Rolls", price: 60, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=800&q=80", description: "Crispy fried rolls filled with fresh julienned vegetables." },
+    
+    // Cafe Gram
+    { name: "Margherita Pizza", category: "Pizza", price: 160, outlet: "Cafe Gram", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80", description: "Classic cheese and tomato pizza." },
+    { name: "Gram Special Aloo Tikki Burger", category: "Burger", price: 150, outlet: "Cafe Gram", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80", description: "Signature crispy aloo tikki burger." },
+    { name: "Paneer Makhani Pizza", category: "Pizza", price: 240, outlet: "Cafe Gram", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80", description: "Rich paneer makhani topped on a fresh pizza crust." },
+    { name: "Chilli Garlic Noodles", category: "Noodle Bar", price: 120, outlet: "Cafe Gram", image: "https://upload.wikimedia.org/wikipedia/commons/1/13/A_bowl_of_Spring_noodles_soup.jpg", description: "Spicy chilli garlic wok-tossed noodles." },
+    { name: "Classic Hot Chocolate", category: "Hot Chocolate", price: 100, outlet: "Cafe Gram", image: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=80", description: "Rich, warm, and comforting hot chocolate." },
+    { name: "Butter Croissant", category: "Desserts", price: 120, outlet: "Cafe Gram", image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80", description: "Flaky, buttery, freshly baked croissant." },
+
+    // Cibus Cafe
+    { name: "Plain Maggi", category: "Maggi and Poha", price: 30, outlet: "Cibus Cafe", image: "https://upload.wikimedia.org/wikipedia/commons/1/13/A_bowl_of_Spring_noodles_soup.jpg", description: "Everyone's favorite classic plain Maggi." },
+    { name: "Aloo Paratha", category: "Paratha Hut", price: 80, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1626779815049-36eb42817db4?auto=format&fit=crop&w=800&q=80", description: "Stuffed potato paratha, served hot." },
+    { name: "Plain Dosa", category: "South Indian", price: 60, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1630403759714-27909dd43e67?auto=format&fit=crop&w=800&q=80", description: "Crispy South Indian dosa served with chutney." },
+    { name: "Choley Bhatura", category: "Combo Meals", price: 90, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1626779815049-36eb42817db4?auto=format&fit=crop&w=800&q=80", description: "Spicy chickpea curry with fluffy bhatura." },
+    { name: "Veg. Momos", category: "Chinese Food", price: 100, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80", description: "Soft steamed momos with spicy dip." },
+    { name: "Kulhad Chai", category: "Hot Warm Up", price: 20, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1576092768241-dec2310123f6?auto=format&fit=crop&w=800&q=80", description: "Traditional spiced tea served in an earthen cup." }
 ];
 
 // Initialize database schema
@@ -127,12 +65,16 @@ async function setupDatabase() {
         }
 
         // Create Menu Items table
+        // First drop to clear out old data lacking the 'outlet' column
+        await client.query('DROP TABLE IF EXISTS menu_items CASCADE');
+        
         await client.query(`
-            CREATE TABLE IF NOT EXISTS menu_items (
+            CREATE TABLE menu_items (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 category TEXT NOT NULL,
                 price INTEGER NOT NULL,
+                outlet TEXT NOT NULL,
                 image TEXT NOT NULL,
                 description TEXT,
                 is_best_seller INTEGER DEFAULT 0
@@ -164,15 +106,12 @@ async function setupDatabase() {
             );
         `);
 
-        // Seed Menu Items if empty
-        const { rows: mRows } = await client.query('SELECT COUNT(*) as count FROM menu_items');
-        if (parseInt(mRows[0].count) === 0) {
-            console.log("Seeding menu items...");
-            for (const item of menuItemsSeed) {
-                const isBest = ['Burger', 'Cold Coffee', 'Spring Roll', 'Steam Momos (6pc)'].includes(item.name) ? 1 : 0;
-                await client.query('INSERT INTO menu_items (name, category, price, image, description, is_best_seller) VALUES ($1, $2, $3, $4, $5, $6)', 
-                    [item.name, item.category, item.price, item.image, item.description, isBest]);
-            }
+        // Always seed if empty after the drop
+        console.log("Seeding menu items for outlets...");
+        for (const item of menuItemsSeed) {
+            const isBest = ['Gram Special Aloo Tikki Burger', 'Margherita Pizza', 'Spring Roll', 'Kulhad Chai'].includes(item.name) ? 1 : 0;
+            await client.query('INSERT INTO menu_items (name, category, price, outlet, image, description, is_best_seller) VALUES ($1, $2, $3, $4, $5, $6, $7)', 
+                [item.name, item.category, item.price, item.outlet, item.image, item.description, isBest]);
         }
         
         console.log("Database initialized successfully.");

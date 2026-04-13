@@ -1,5 +1,6 @@
 let allMenuItems = []; // Holds fetched menu items
 let currentCategory = "All";
+let currentOutlet = "All";
 let searchQuery = "";
 
 // Auto-detect server address
@@ -90,12 +91,44 @@ function filterAndDisplay() {
     const filtered = allMenuItems.filter(item => {
         const matchesSearch = item.name.toLowerCase().includes(searchQuery) || (item.description || '').toLowerCase().includes(searchQuery);
         let matchesCategory = true;
+        let matchesOutlet = true;
+        
         if (currentCategory !== "All") {
             matchesCategory = item.category.includes(currentCategory);
         }
-        return matchesSearch && matchesCategory;
+        if (currentOutlet !== "All") {
+            matchesOutlet = item.outlet === currentOutlet;
+        }
+        return matchesSearch && matchesCategory && matchesOutlet;
     });
+
+    // Update dynamic headline
+    const headerTitle = document.getElementById("menuHeaderTitle");
+    if (headerTitle) {
+        headerTitle.textContent = currentOutlet === "All" ? "Full Campus Menu" : `Menu from ${currentOutlet}`;
+    }
+
     displayMenuItems(filtered);
+    generateCategoryChips();
+}
+
+function generateCategoryChips() {
+    const chipsContainer = document.getElementById("categoryChips");
+    if (!chipsContainer) return;
+
+    // Get categories available in current filtered outlet
+    const availableItems = currentOutlet === "All" ? allMenuItems : allMenuItems.filter(i => i.outlet === currentOutlet);
+    const uniqueCategories = [...new Set(availableItems.map(i => i.category))];
+    
+    // Sort logically or alphabetically
+    uniqueCategories.sort();
+    
+    let chipsHtml = `<button class="chip ${currentCategory === 'All' ? 'active' : ''}" data-category="All">All</button>`;
+    uniqueCategories.forEach(cat => {
+        chipsHtml += `<button class="chip ${currentCategory === cat ? 'active' : ''}" data-category="${cat}">${cat}</button>`;
+    });
+    
+    chipsContainer.innerHTML = chipsHtml;
 }
 
 // Ensure the original rendering logic accepts arbitrary arrays
@@ -558,6 +591,29 @@ if (categoryChips) {
             categoryChips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
             e.target.classList.add("active");
             currentCategory = e.target.dataset.category;
+            filterAndDisplay();
+        }
+    });
+}
+
+const outletTabs = document.getElementById("outletTabs");
+if (outletTabs) {
+    outletTabs.addEventListener("click", (e) => {
+        const btn = e.target.closest(".outlet-tab");
+        if (btn) {
+            outletTabs.querySelectorAll(".outlet-tab").forEach(c => c.classList.remove("active"));
+            btn.classList.add("active");
+            currentOutlet = btn.dataset.outlet;
+            currentCategory = "All"; // reset category when swiching outlets
+            
+            // Add a small 3D flip animation to grids when changing tabs
+            const grids = document.querySelectorAll('.dynamic-3d');
+            grids.forEach(g => {
+                g.style.animation = 'none';
+                void g.offsetWidth; // trigger reflow
+                g.style.animation = 'flipIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+            });
+
             filterAndDisplay();
         }
     });

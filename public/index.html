@@ -40,35 +40,52 @@
             </div>
         </header>
 
-        <section class="panel best-sellers-panel">
-            <div class="panel-head">
-                <h2>Best Sellers 🔥</h2>
-                <p>Our most loved and frequently ordered items.</p>
+        <section class="outlet-selector">
+            <div class="outlet-tabs" id="outletTabs">
+                <button class="outlet-tab active" data-outlet="All">
+                    <span class="tab-icon">✨</span>
+                    All Outlets
+                </button>
+                <button class="outlet-tab" data-outlet="PU Canteen">
+                    <span class="tab-icon">🥪</span>
+                    PU Canteen
+                </button>
+                <button class="outlet-tab" data-outlet="Cafe Gram">
+                    <span class="tab-icon">🍕</span>
+                    Cafe Gram
+                </button>
+                <button class="outlet-tab" data-outlet="Cibus Cafe">
+                    <span class="tab-icon">🍜</span>
+                    Cibus Cafe
+                </button>
             </div>
-            <div id="bestSellersGrid" class="menu-grid"></div>
         </section>
 
-        <section class="panel filter-panel">
+        <section class="panel filter-panel glass-panel">
             <div class="search-wrap">
                 <svg class="search-icon" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" id="searchInput" placeholder="Search for burgers, coffee, momos..." aria-label="Search menu">
+                <input type="text" id="searchInput" placeholder="Search across menus..." aria-label="Search menu">
             </div>
             <div class="category-chips" id="categoryChips">
-                <button class="chip active" data-category="All">All</button>
-                <button class="chip" data-category="Fast Food">Fast Food</button>
-                <button class="chip" data-category="Chinese">Chinese</button>
-                <button class="chip" data-category="Sandwich">Sandwich</button>
-                <button class="chip" data-category="Beverage">Beverages</button>
-                <button class="chip" data-category="Rolls">Rolls</button>
+                <!-- Javascript will dynamically inject these based on selected outlet -->
+                <button class="chip active" data-category="All">All Categories</button>
             </div>
         </section>
 
-        <section class="panel">
+        <section class="panel best-sellers-panel glass-panel dynamic-3d">
             <div class="panel-head">
-                <h2>Popular Canteen Menu</h2>
-                <p>Menu designed from your canteen board. Tap any item to select it.</p>
+                <h2>Top Picks 🔥</h2>
+                <p>The most loved items from your selected outlet.</p>
             </div>
-            <div id="menuGrid" class="menu-grid"></div>
+            <div id="bestSellersGrid" class="menu-grid grid-3d"></div>
+        </section>
+
+        <section class="panel menu-wrapper glass-panel dynamic-3d">
+            <div class="panel-head">
+                <h2 id="menuHeaderTitle">Full Menu</h2>
+                <p>Explore the complete menu. Tap to add items to your unified cart.</p>
+            </div>
+            <div id="menuGrid" class="menu-grid grid-3d"></div>
         </section>
 
         <section class="panel">

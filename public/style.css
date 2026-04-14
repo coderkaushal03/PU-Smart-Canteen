@@ -14,15 +14,18 @@
     --shadow: 0 18px 40px rgba(24, 38, 31, 0.16);
 }
 
-* {
-    box-sizing: border-box;
+html, body {
+    width: 100%;
+    max-width: 100%;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+    position: relative;
+    box-sizing: border-box;
 }
 
-html, body {
-    max-width: 100%;
-    overflow-x: hidden;
+*, *::before, *::after {
+    box-sizing: inherit;
 }
 
 body {
@@ -56,8 +59,10 @@ body {
 .order-topbar,
 .index-topbar {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
+    width: 100%;
+    max-width: 100%;
 }
 
 .order-topbar > *,
@@ -183,7 +188,8 @@ body {
     border-radius: 22px;
     padding: 26px;
     box-shadow: var(--shadow);
-    overflow: hidden;
+    overflow: hidden; /* Prevent background bleeding */
+    max-width: 100%;
 }
 
 .badge {
@@ -261,6 +267,8 @@ body {
     border: 1px solid var(--line);
     padding: 18px;
     box-shadow: 0 14px 32px rgba(36, 31, 22, 0.08);
+    max-width: 100%;
+    overflow: hidden; /* Contain inner content */
 }
 
 .panel-head h2 {
@@ -947,7 +955,7 @@ input[readonly] {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    background: var(--brand);
     color: #ffffff;
     padding: 16px 24px;
     border-radius: 14px;
@@ -1070,6 +1078,7 @@ input[readonly] {
 }
 .filter-bar-row {
     display: flex;
+    flex-wrap: wrap; /* Prevent collision on mid-sized screens */
     gap: 16px;
     align-items: center;
     margin-bottom: 24px;
@@ -1134,6 +1143,7 @@ input[readonly] {
     overflow-x: auto;
     padding-bottom: 4px;
     scrollbar-width: none;
+    max-width: 100%;
 }
 .category-chips::-webkit-scrollbar {
     display: none;

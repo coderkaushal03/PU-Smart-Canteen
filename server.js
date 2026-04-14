@@ -221,6 +221,18 @@ const isAdmin = async (req, res, next) => {
     }
 };
 
+app.get('/api/admin/analytics', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const usersResult = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'Student'");
+        res.json({
+            totalUsers: parseInt(usersResult.rows[0].count)
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch analytics' });
+    }
+});
+
 app.get('/api/admin/orders', authenticateToken, isAdmin, async (req, res) => {
     try {
         const result = await pool.query(`

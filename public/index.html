@@ -82,9 +82,11 @@
         </section>
 
         <section class="panel filter-panel glass-panel">
-            <div class="search-wrap">
-                <svg class="search-icon" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" id="searchInput" placeholder="Search across menus..." aria-label="Search menu">
+            <div class="filter-bar-row" style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+                <div class="search-wrap" style="flex: 1; margin-bottom: 0; min-width: 250px;">
+                    <svg class="search-icon" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search across menus..." aria-label="Search menu">
+                </div>
                 <div class="stock-toggle-wrap">
                     <label class="stock-switch">
                         <input type="checkbox" id="hideStockToggle">

@@ -13,6 +13,57 @@ const API_BASE = (window.location.hostname === "localhost" || window.location.ho
         ? `http://${window.location.hostname}:3000` 
         : window.location.origin);
 
+let lastOrderStatuses = {}; // For tracking state changes across polling
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Icon mapping
+    const icons = {
+        'success': '✅',
+        'info': '🔔',
+        'warning': '⚠️',
+        'error': '❌'
+    };
+    
+    const titles = {
+        'success': 'Success',
+        'info': 'Order Update',
+        'warning': 'Notice',
+        'error': 'Error'
+    };
+
+    const icon = icons[type] || icons.success;
+    const title = titles[type] || titles.success;
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">
+            <h4>${title}</h4>
+            <p>${message}</p>
+        </div>
+        <button class="toast-close" title="Close">&times;</button>
+    `;
+
+    toast.querySelector('.toast-close').onclick = () => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 400);
+    };
+
+    container.appendChild(toast);
+
+    // Auto-dismiss
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.classList.add('removing');
+            setTimeout(() => toast.remove(), 400);
+        }
+    }, 4500);
+}
 
 const menuGrid = document.getElementById("menuGrid");
 // Legacy form elements removed for V2 SPA layout
@@ -333,12 +384,38 @@ async function renderOrders() {
         const tokenCache = localStorage.getItem("smartCanteenToken");
         if(!tokenCache) return;
 
+        // Visual Sync Feedback
+        const syncInd = document.getElementById('syncIndicator');
+        if(syncInd) syncInd.classList.add('syncing');
+
         const response = await fetch(`${API_BASE}/api/orders`, {
             headers: { "Authorization": `Bearer ${tokenCache}` }
         });
 
+        if(syncInd) {
+            setTimeout(() => syncInd.classList.remove('syncing'), 800);
+        }
+
         if (response.ok) {
             const orders = await response.json();
+            
+            // Notification Logic: Check for status changes
+            orders.forEach(order => {
+                const orderId = order.id;
+                const currentStatus = order.status;
+                const prevStatus = lastOrderStatuses[orderId];
+
+                // If status changed to 'Ready', notify user!
+                if (prevStatus && prevStatus !== currentStatus && currentStatus === 'Ready') {
+                    showToast(`Order #${order.token} is now ready for pickup!`, 'info');
+                    // Play a subtle notification sound if possible? 
+                    // (Omitted for brevity, but easily added via new Audio())
+                }
+                
+                // Update local state
+                lastOrderStatuses[orderId] = currentStatus;
+            });
+
             ordersListElement.innerHTML = "";
 
             if (orders.length === 0) {
@@ -566,34 +643,8 @@ async function checkAuthStatus() {
 }
 checkAuthStatus();
 
-// Toast UI Utility
-function showToast(message) {
-    let toast = document.getElementById("cartToast");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "cartToast";
-        toast.className = "toast-popup";
-        toast.innerHTML = `
-            <svg class="toast-icon" viewBox="0 0 24 24">
-                <path d="M20 6L9 17l-5-5"/>
-            </svg>
-            <span id="toastMsg"></span>
-        `;
-        document.body.appendChild(toast);
-    }
-    
-    document.getElementById("toastMsg").textContent = message;
-    
-    toast.classList.remove("show");
-    void toast.offsetWidth; 
-    toast.classList.add("show");
-    
-    if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
-    
-    toast.hideTimeout = setTimeout(() => {
-        toast.classList.remove("show");
-    }, 3000);
-}
+
+
 
 // Search and Filter Listeners
 const searchInput = document.getElementById("searchInput");
@@ -660,6 +711,8 @@ function toggleDrawer(forceClose = false) {
     } else {
         cartDrawer.classList.add("open");
         drawerOverlay.classList.add("show");
+        // Trigger immediate sync update when opening status/cart drawer
+        renderOrders();
     }
 }
 
@@ -686,7 +739,7 @@ if (drawerCheckoutForm) {
         try {
             const tokenCache = localStorage.getItem("smartCanteenToken");
             if (!tokenCache) {
-                showToast("You must log in to place an order.");
+                showToast("You must log in to place an order.", "warning");
                 toggleDrawer(true);
                 setTimeout(() => window.location.href = "login.html", 1000);
                 return;
@@ -716,7 +769,7 @@ if (drawerCheckoutForm) {
                 cart = [];
                 renderCart();
                 toggleDrawer(true);
-                showToast(`Order confirmed! Rs ${cartTotalCost} deducted.`);
+                showToast(`Order confirmed! Rs ${cartTotalCost} deducted.`, "success");
                 renderOrders(); 
                 // Wait briefly then refresh auth status (and wallet balance)
                 setTimeout(() => window.location.reload(), 1500);

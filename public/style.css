@@ -1800,3 +1800,99 @@ input[readonly] {
         transform: rotateX(0deg) translateY(0);
     }
 }
+
+/* OUT OF STOCK CSS */
+.out-of-stock .menu-image {
+    filter: grayscale(100%) blur(1px);
+    opacity: 0.6;
+}
+
+.out-of-stock {
+    opacity: 0.7;
+    pointer-events: auto; /* keep enabled so user can see it but not buy */
+}
+
+.out-of-stock-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    background: #ef4444; /* red */
+    color: white;
+    padding: 6px 14px;
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 10;
+    border: 3px solid rgba(255,255,255,0.8);
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+}
+
+.nav-disabled {
+    pointer-events: none !important;
+    background: #475569 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Hide Stock Toggle Switch UI */
+.stock-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    background: rgba(255,255,255,0.05);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .stock-toggle-wrap {
+        display: none; /* Hide on small screens to save space */
+    }
+}
+
+.stock-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.stock-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+.stock-switch input { opacity: 0; width: 0; height: 0; }
+.stock-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--line);
+    transition: .3s;
+    border-radius: 20px;
+}
+.stock-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+.stock-switch input:checked + .stock-slider { background-color: var(--brand); }
+.stock-switch input:checked + .stock-slider:before { 
+    transform: translateX(16px);
+}

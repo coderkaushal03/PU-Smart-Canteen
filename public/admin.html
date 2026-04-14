@@ -241,6 +241,36 @@
             font-size: 0.9rem;
         }
 
+        /* Inventory Toggles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ef4444; /* Default Red, out of stock */
+            transition: .3s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #10b981; /* Green, available */ }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         .column {
             background: var(--surface);
             border-radius: 16px;
@@ -367,6 +397,7 @@
             <div class="header-tabs">
                 <button class="tab-btn active" data-target="kanbanView">Kanban Board</button>
                 <button class="tab-btn" data-target="analyticsView">Analytics</button>
+                <button class="tab-btn" data-target="inventoryView">Inventory</button>
             </div>
         </div>
         <div class="header-actions">
@@ -478,6 +509,33 @@
                 </table>
             </div>
         </div>
+
+        <!-- INVENTORY DASHBOARD VIEW -->
+        <div id="inventoryView" class="view-section">
+            <div class="analytics-topbar">
+                <h2>Menu Inventory Control</h2>
+                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    Toggle items to securely flag them as Available or Out of Stock across the entire network.
+                </div>
+            </div>
+
+            <div class="data-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Outlet</th>
+                            <th>Price</th>
+                            <th>Availability Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- JS injected -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -494,6 +552,7 @@
         }
 
         let allOrders = [];
+        let allMenuItems = [];
         let totalSystemUsers = 0;
         let revenueChartInstance = null;
         let outletChartInstance = null;
@@ -542,6 +601,13 @@
                 if (resAnalytics.ok) {
                     const analytics = await resAnalytics.json();
                     totalSystemUsers = analytics.totalUsers;
+                }
+
+                // Fetch Menu Inventory
+                const resMenu = await fetch(`${API_URL}/menu`);
+                if (resMenu.ok) {
+                    allMenuItems = await resMenu.json();
+                    renderInventory(allMenuItems);
                 }
                 
                 // If currently on analytical tab, re-render safely
@@ -795,6 +861,46 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        /* --- INVENTORY LOGIC --- */
+        function renderInventory(menu) {
+            const tbody = document.getElementById("inventoryTableBody");
+            // Sort by outlet
+            const sortedMenu = [...menu].sort((a,b) => a.outlet.localeCompare(b.outlet));
+            
+            tbody.innerHTML = sortedMenu.map(m => `
+                <tr>
+                    <td style="font-weight:600; color:var(--text-main)">${m.name}</td>
+                    <td>${m.category}</td>
+                    <td>${m.outlet}</td>
+                    <td>₹${m.price}</td>
+                    <td>
+                        <label class="switch">
+                            <input type="checkbox" ${m.is_available ? 'checked' : ''} onchange="toggleItemAvailability(${m.id}, this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        async function toggleItemAvailability(id, newState) {
+            try {
+                const res = await fetch(`${API_URL}/admin/menu/${id}/availability`, {
+                    method: 'PUT',
+                    headers: { 
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ is_available: newState })
+                });
+                if(!res.ok) throw new Error("Failed to update availability");
+            } catch (error) {
+                console.error("Availability Toggle Error", error);
+                alert("Failed to update inventory. Synchronizing...");
+                fetchAdminData(); // Refresh UI on fail
+            }
         }
 
         function adminLogout() {

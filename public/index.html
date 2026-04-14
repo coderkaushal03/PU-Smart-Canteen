@@ -85,6 +85,13 @@
             <div class="search-wrap">
                 <svg class="search-icon" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input type="text" id="searchInput" placeholder="Search across menus..." aria-label="Search menu">
+                <div class="stock-toggle-wrap">
+                    <label class="stock-switch">
+                        <input type="checkbox" id="hideStockToggle">
+                        <span class="stock-slider"></span>
+                    </label>
+                    <span class="stock-label">Hide out of stock</span>
+                </div>
             </div>
             <div class="category-chips" id="categoryChips">
                 <!-- Javascript will dynamically inject these based on selected outlet -->

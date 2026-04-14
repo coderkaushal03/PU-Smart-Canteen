@@ -137,6 +137,16 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'Insufficient Wallet Funds!', required: total, current: userRec?.balance });
         }
 
+        // Validate Inventory
+        const requestedNames = items.map(i => i.name);
+        const invCheck = await pool.query('SELECT name, is_available FROM menu_items WHERE name = ANY($1)', [requestedNames]);
+        for (const reqItem of items) {
+            const match = invCheck.rows.find(row => row.name === reqItem.name);
+            if (!match || !match.is_available) {
+                return res.status(400).json({ error: `Item '${reqItem.name}' is currently out of stock. Please remove it to proceed.` });
+            }
+        }
+
         const token = `PUC-${Math.floor(Math.random() * 900 + 100)}`;
 
         // Transaction handling (basic)
@@ -262,6 +272,18 @@ app.put('/api/admin/orders/:id/status', authenticateToken, isAdmin, async (req, 
         res.json({ message: 'Order status updated' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update order status' });
+    }
+});
+
+app.put('/api/admin/menu/:id/availability', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const { is_available } = req.body;
+        if (typeof is_available !== 'boolean') return res.status(400).json({ error: 'Invalid availability state' });
+        
+        await pool.query('UPDATE menu_items SET is_available = $1 WHERE id = $2', [is_available, req.params.id]);
+        res.json({ message: 'Menu item availability updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update menu item availability' });
     }
 });
 

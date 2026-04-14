@@ -599,9 +599,9 @@ if (categoryChips) {
 const outletTabs = document.getElementById("outletTabs");
 if (outletTabs) {
     outletTabs.addEventListener("click", (e) => {
-        const btn = e.target.closest(".outlet-tab");
+        const btn = e.target.closest(".outlet-card");
         if (btn) {
-            outletTabs.querySelectorAll(".outlet-tab").forEach(c => c.classList.remove("active"));
+            outletTabs.querySelectorAll(".outlet-card").forEach(c => c.classList.remove("active"));
             btn.classList.add("active");
             currentOutlet = btn.dataset.outlet;
             currentCategory = "All"; // reset category when swiching outlets

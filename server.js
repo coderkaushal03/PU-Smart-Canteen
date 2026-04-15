@@ -191,13 +191,21 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
 app.get('/api/orders', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
-        const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+        // Alias 'total' to 'total_amount' for frontend compatibility
+        const result = await pool.query('SELECT *, total as total_amount FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
         const orders = result.rows;
         
         for (let order of orders) {
-            const itemsResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [order.id]);
+            // Join with menu_items and outlets to get the outlet name for each item
+            const itemsResult = await pool.query(`
+                SELECT oi.*, o.name as outlet
+                FROM order_items oi
+                JOIN menu_items mi ON oi.item_name = mi.name
+                JOIN outlets o ON mi.outlet_id = o.id
+                WHERE oi.order_id = $1
+            `, [order.id]);
             order.items = itemsResult.rows;
-            order.student = req.user.enrollment;
+            order.student = req.user.name;
             order.enrollment = req.user.enrollment;
         }
 
@@ -248,8 +256,12 @@ const isAdmin = async (req, res, next) => {
 app.get('/api/admin/analytics', authenticateToken, isAdmin, async (req, res) => {
     try {
         const usersResult = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'Student'");
+        const ordersResult = await pool.query("SELECT COUNT(*) as count, SUM(total) as revenue FROM orders");
+        
         res.json({
-            totalUsers: parseInt(usersResult.rows[0].count)
+            totalUsers: parseInt(usersResult.rows[0].count),
+            totalOrders: parseInt(ordersResult.rows[0].count || 0),
+            totalRevenue: parseFloat(ordersResult.rows[0].revenue || 0)
         });
     } catch (error) {
         console.error(error);
@@ -260,18 +272,25 @@ app.get('/api/admin/analytics', authenticateToken, isAdmin, async (req, res) => 
 app.get('/api/admin/orders', authenticateToken, isAdmin, async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT orders.*, users.name as student, users.enrollment 
+            SELECT orders.*, orders.total as total_amount, users.name as student, users.enrollment 
             FROM orders 
             JOIN users ON orders.user_id = users.id 
             ORDER BY orders.created_at DESC
         `);
         const orders = result.rows;
         for (let order of orders) {
-            const itemsRes = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [order.id]);
+            const itemsRes = await pool.query(`
+                SELECT oi.*, o.name as outlet
+                FROM order_items oi
+                JOIN menu_items mi ON oi.item_name = mi.name
+                JOIN outlets o ON mi.outlet_id = o.id
+                WHERE oi.order_id = $1
+            `, [order.id]);
             order.items = itemsRes.rows;
         }
         res.json(orders);
     } catch (error) {
+        console.error("Admin Orders Fetch Error:", error);
         res.status(500).json({ error: 'Failed to fetch admin orders' });
     }
 });

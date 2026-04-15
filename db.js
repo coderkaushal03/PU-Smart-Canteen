@@ -65,10 +65,13 @@ async function setupDatabase() {
         }
 
         // Create Menu Items table
+        // First drop to clear out old data lacking the 'outlet' column
+        await client.query('DROP TABLE IF EXISTS menu_items CASCADE');
+        
         await client.query(`
-            CREATE TABLE IF NOT EXISTS menu_items (
+            CREATE TABLE menu_items (
                 id SERIAL PRIMARY KEY,
-                name TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
                 category TEXT NOT NULL,
                 price INTEGER NOT NULL,
                 outlet TEXT NOT NULL,
@@ -104,21 +107,13 @@ async function setupDatabase() {
             );
         `);
 
-        // Seed menu items using UPSERT logic to avoid duplicates or clearing data
-        console.log("Syncing menu items for outlets...");
+        // Always seed if empty after the drop
+        console.log("Seeding menu items for outlets...");
         for (const item of menuItemsSeed) {
             const isBest = ['Gram Special Aloo Tikki Burger', 'Margherita Pizza', 'Spring Roll', 'Kulhad Chai'].includes(item.name) ? 1 : 0;
-            await client.query(`
-                INSERT INTO menu_items (name, category, price, outlet, image, description, is_best_seller, is_available) 
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                ON CONFLICT (name) DO UPDATE SET
-                    category = EXCLUDED.category,
-                    price = EXCLUDED.price,
-                    outlet = EXCLUDED.outlet,
-                    image = EXCLUDED.image,
-                    description = EXCLUDED.description,
-                    is_best_seller = EXCLUDED.is_best_seller;
-            `, [item.name, item.category, item.price, item.outlet, item.image, item.description, isBest, true]);
+            // Native fallback to standard TRUE availability on fresh seed
+            await client.query('INSERT INTO menu_items (name, category, price, outlet, image, description, is_best_seller, is_available) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', 
+                [item.name, item.category, item.price, item.outlet, item.image, item.description, isBest, true]);
         }
         
         console.log("Database initialized successfully.");

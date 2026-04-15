@@ -79,11 +79,8 @@ async function setupDatabase() {
         }
 
         // 3. Create Menu Items table (Harden schema)
-        // Final Wipe for transition to normalized outlet_id schema
-        await client.query('DROP TABLE IF EXISTS menu_items CASCADE');
-        
         await client.query(`
-            CREATE TABLE menu_items (
+            CREATE TABLE IF NOT EXISTS menu_items (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 category TEXT NOT NULL,
@@ -130,6 +127,10 @@ async function setupDatabase() {
             return acc;
         }, {});
 
+        // Begin Transaction for resilient seeding
+        await client.query('BEGIN');
+        let seededCount = 0;
+
         for (const item of menuItemsSeed) {
             const outletId = outletMap[item.outlet];
             if (!outletId) continue;
@@ -146,9 +147,11 @@ async function setupDatabase() {
                     description = EXCLUDED.description,
                     is_best_seller = EXCLUDED.is_best_seller
             `, [item.name, item.category, item.price, outletId, item.image, item.description, isBest, true]);
+            seededCount++;
         }
         
-        console.log("Database persistent state verified.");
+        await client.query('COMMIT');
+        console.log(`Database persistent state verified. Seeded/Updated ${seededCount} items.`);
     } catch (err) {
         console.error("Database setup error:", err);
     } finally {

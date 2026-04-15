@@ -776,4 +776,31 @@ async function fetchTraffic() {
 // Start tracking traffic immediately and update every 15 seconds
 fetchTraffic();
 setInterval(fetchTraffic, 15000);
+// Global Refresh/Sync Handler
+document.addEventListener("click", (e) => {
+    const syncBtn = e.target.closest("#syncIndicator");
+    if (syncBtn) {
+        // Spin effect is handled via .syncing class in CSS, 
+        // which certain functions add/remove automatically.
+        // We can force it here for immediate feedback if needed.
+        
+        console.log("Manual refresh requested...");
+        
+        // 1. Refresh Traffic
+        fetchTraffic();
+        
+        // 2. Refresh Orders (if authenticated/on order page)
+        if (typeof renderOrders === "function") renderOrders();
+        
+        // 3. Refresh Order History
+        if (typeof renderOrderHistory === "function") renderOrderHistory();
+        
+        // 4. Refresh Menu if on Index
+        if (typeof renderMenu === "function" && document.getElementById("menuGrid")) {
+            allMenuItems = []; // Clear cache to force re-fetch
+            renderMenu();
+        }
 
+        showToast("Refreshing live data...", "info");
+    }
+});

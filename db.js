@@ -127,12 +127,10 @@ async function setupDatabase() {
 
         // Seed menu items robustly
         console.log("Synchronizing stable menu data...");
-        const { rows: existingOutlets } = await client.query('SELECT        // 4. Refresh Menu if on Index
-        if (typeof renderMenu === "function" && document.getElementById("menuGrid")) {
-            allMenuItems = []; // Clear cache to force re-fetch
-            const grid = document.getElementById("menuGrid");
-            if (grid) grid.innerHTML = '<div class="loading-spinner">Refreshing menu...</div>';
-            renderMenu();
+        const { rows: existingOutlets } = await client.query('SELECT id, name FROM outlets');
+        const outletMap = existingOutlets.reduce((acc, row) => {
+            acc[row.name] = row.id;
+            return acc;
         }, {});
 
         // Begin Transaction for resilient seeding

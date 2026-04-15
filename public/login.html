@@ -59,7 +59,9 @@
                     <a class="secondary-btn btn-link" href="signup.html">Create New Account</a>
                 </div>
                 <p id="loginMsg" class="login-help" style="color: red;"></p>
-                <p class="login-help">Forgot password? Visit the canteen desk or contact IT.</p>
+                <p class="login-help">
+                    Forgot password? <a href="#" id="forgotPasswordBtn" style="color: var(--brand); font-weight: 700;">Reset it here</a>
+                </p>
             </form>
             <div class="row action-row">
                 <a class="secondary-btn btn-link" href="index.html">Go to Main Page</a>
@@ -114,6 +116,130 @@
                 loginMsg.textContent = "Network error or server down.";
             } finally {
                 submitBtn.classList.remove("btn-loading");
+            }
+        });
+    </script>
+
+    <!-- Forgot Password Modal -->
+    <div id="resetModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel" style="max-width: 400px;">
+            <div class="panel-head">
+                <h2 id="resetModalTitle">Forgot Password</h2>
+                <p id="resetModalDesc">Enter your enrollment or email to receive a reset PIN.</p>
+            </div>
+            
+            <!-- Step 1: Identity -->
+            <div id="resetStep1">
+                <div class="field" style="margin-bottom: 20px;">
+                    <label>Enrollment / Email</label>
+                    <input id="resetLoginId" type="text" placeholder="PU24BCA101">
+                </div>
+                <div class="row action-row">
+                    <button id="sendPinBtn" class="primary-btn">Send PIN</button>
+                    <button class="secondary-btn close-modal-btn">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Verification -->
+            <div id="resetStep2" style="display: none;">
+                <div class="field" style="margin-bottom: 12px;">
+                    <label>Enter 6-Digit PIN</label>
+                    <input id="resetPinCode" type="text" maxlength="6" placeholder="000000" style="text-align: center; letter-spacing: 4px; font-weight: 800;">
+                </div>
+                <div class="field" style="margin-bottom: 20px;">
+                    <label>New Password</label>
+                    <input id="resetNewPassword" type="password" placeholder="Min 6 characters">
+                </div>
+                <div class="row action-row">
+                    <button id="confirmResetBtn" class="primary-btn">Reset Password</button>
+                    <button class="secondary-btn close-modal-btn">Cancel</button>
+                </div>
+            </div>
+
+            <p id="resetNotice" style="margin-top: 15px; font-size: 0.85rem; color: #ef4444; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <script>
+        const resetModal = document.getElementById("resetModal");
+        const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+        const closeModalBtns = document.querySelectorAll(".close-modal-btn");
+        const resetStep1 = document.getElementById("resetStep1");
+        const resetStep2 = document.getElementById("resetStep2");
+        const resetNotice = document.getElementById("resetNotice");
+        
+        let targetUserId = null;
+
+        forgotPasswordBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            resetModal.classList.add("active");
+            resetStep1.style.display = "block";
+            resetStep2.style.display = "none";
+            resetNotice.textContent = "";
+        });
+
+        closeModalBtns.forEach(btn => btn.addEventListener("click", () => resetModal.classList.remove("active")));
+
+        document.getElementById("sendPinBtn").addEventListener("click", async () => {
+            const loginId = document.getElementById("resetLoginId").value.trim();
+            if(!loginId) return resetNotice.textContent = "Please enter your ID.";
+            
+            resetNotice.style.color = "var(--brand)";
+            resetNotice.textContent = "Processing...";
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ loginId })
+                });
+                const data = await response.json();
+                
+                if(response.ok) {
+                    targetUserId = data.userId;
+                    resetStep1.style.display = "none";
+                    resetStep2.style.display = "block";
+                    document.getElementById("resetModalTitle").textContent = "Verify PIN";
+                    document.getElementById("resetModalDesc").textContent = "Check your 'Email' for the 6-digit PIN.";
+                    resetNotice.style.color = "var(--brand)";
+                    resetNotice.textContent = `[DEMO] Reset PIN: ${data.demoPin}`;
+                } else {
+                    resetNotice.style.color = "#ef4444";
+                    resetNotice.textContent = data.error || "Failed to initiate reset.";
+                }
+            } catch (e) {
+                resetNotice.textContent = "Server error.";
+            }
+        });
+
+        document.getElementById("confirmResetBtn").addEventListener("click", async () => {
+            const pin = document.getElementById("resetPinCode").value.trim();
+            const newPassword = document.getElementById("resetNewPassword").value;
+            
+            if(pin.length < 6 || newPassword.length < 6) {
+                return resetNotice.textContent = "Enter valid PIN and password (min 6 chars).";
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/reset-password`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId: targetUserId, pin, newPassword })
+                });
+                const data = await response.json();
+                
+                if(response.ok) {
+                    alert("Password reset successful! You can now login.");
+                    resetModal.classList.remove("active");
+                    // Clear inputs for next time
+                    document.getElementById("resetPinCode").value = "";
+                    document.getElementById("resetNewPassword").value = "";
+                } else {
+                    resetNotice.style.color = "#ef4444";
+                    resetNotice.textContent = data.error || "Reset failed.";
+                }
+            } catch (e) {
+                resetNotice.textContent = "Server error.";
             }
         });
     </script>

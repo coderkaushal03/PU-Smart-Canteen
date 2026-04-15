@@ -97,6 +97,68 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 /* --- Auth / Profile Routes --- */
+
+// Request password reset
+app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+        const { loginId } = req.body;
+        const result = await pool.query('SELECT * FROM users WHERE enrollment = $1 OR email = $2', [loginId, loginId]);
+        const user = result.rows[0];
+
+        if (!user) {
+            // Generic message for security
+            return res.json({ message: 'If this user exists, a reset PIN has been generated.' });
+        }
+
+        const pin = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiry = new Date(Date.now() + 10 * 60000); // 10 mins
+
+        await pool.query(
+            'UPDATE users SET reset_pin = $1, reset_expiry = $2 WHERE id = $3',
+            [pin, expiry, user.id]
+        );
+
+        // In production, send email. For demo, return in response or console
+        console.log(`[MOCK EMAIL] Reset PIN for ${user.email} (${user.enrollment}): ${pin}`);
+        res.json({ 
+            message: 'A reset PIN has been generated.', 
+            demoPin: pin, // Returning PIN for easier testing by the user
+            userId: user.id 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to initiate reset' });
+    }
+});
+
+// Reset password using PIN
+app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+        const { userId, pin, newPassword } = req.body;
+
+        const result = await pool.query(
+            'SELECT * FROM users WHERE id = $1 AND reset_pin = $2 AND reset_expiry > NOW()',
+            [userId, pin]
+        );
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid or expired reset PIN' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await pool.query(
+            'UPDATE users SET password = $1, reset_pin = NULL, reset_expiry = NULL WHERE id = $2',
+            [hashedPassword, user.id]
+        );
+
+        res.json({ message: 'Password reset successful. You can now log in.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to reset password' });
+    }
+});
+
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT id, name, enrollment, email, role, balance FROM users WHERE id = $1', [req.user.id]);

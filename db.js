@@ -50,6 +50,8 @@ async function setupDatabase() {
                 password TEXT NOT NULL,
                 role TEXT DEFAULT 'Student',
                 balance INTEGER DEFAULT 500,
+                reset_pin TEXT,
+                reset_expiry TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);

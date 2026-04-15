@@ -15,8 +15,8 @@ const menuItemsSeed = [
     { name: "Chocolate Cheese Sandwich", category: "Sandwich", price: 50, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1528736235302-52922df5c122?auto=format&fit=crop&w=800&q=80", description: "Sweet and savory chocolate cheese sandwich." },
     { name: "Aloo Bhujia Grilled Sandwich", category: "Sandwich", price: 30, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80", description: "Spicy aloo bhujia mix grilled to perfection." },
     { name: "Schezwan Grilled Sandwich", category: "Sandwich", price: 30, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80", description: "Spicy schezwan sauce loaded sandwich." },
-    { name: "Paneer Puff", category: "Bakery", price: 40, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80", description: "Flaky puff pastry stuffed with spiced paneer." },
-    { name: "Spring Roll", category: "Rolls", price: 60, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=800&q=80", description: "Crispy fried rolls filled with fresh julienned vegetables." },
+    { name: "Paneer Puff", category: "Bakery", price: 40, outlet: "PU Canteen", image: "https://aromaticessence.co/wp-content/uploads/2022/08/paneer_puff_featured-500x500.jpg", description: "Flaky puff pastry stuffed with spiced paneer." },
+    { name: "Spring Roll", category: "Rolls", price: 60, outlet: "PU Canteen", image: "https://www.cubesnjuliennes.com/wp-content/uploads/2021/01/Spring-Roll-Recipe.jpg", description: "Crispy fried rolls filled with fresh julienned vegetables." },
     
     // Cafe Gram
     { name: "Margherita Pizza", category: "Pizza", price: 160, outlet: "Cafe Gram", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80", description: "Classic cheese and tomato pizza." },

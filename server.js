@@ -112,10 +112,24 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 /* --- Menu Routes --- */
 app.get('/api/menu', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM menu_items');
+        const query = `
+            SELECT m.*, o.name as outlet 
+            FROM menu_items m
+            JOIN outlets o ON m.outlet_id = o.id
+            ORDER BY m.outlet_id ASC, m.id ASC
+        `;
+        const result = await pool.query(query);
+        
+        // Log consistency metrics
+        const distribution = result.rows.reduce((acc, row) => {
+            acc[row.outlet] = (acc[row.outlet] || 0) + 1;
+            return acc;
+        }, {});
+        console.log(`[Menu API] Fetched ${result.rows.length} items. Distribution:`, distribution);
+        
         res.json(result.rows);
     } catch (error) {
-        console.error(error);
+        console.error("[Menu API Error]", error);
         res.status(500).json({ error: 'Failed to fetch menu items' });
     }
 });

@@ -64,8 +64,22 @@ async function setupDatabase() {
                 ["Canteen Admin", "ADMIN001", "admin@test.com", hashedPw, "Admin", 9999]);
         }
 
-        // Create Menu Items table
-        // First drop to clear out old data lacking the 'outlet' column
+        // 2. Create Outlets table
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS outlets (
+                id SERIAL PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL
+            );
+        `);
+
+        // Seed Outlets if empty
+        const initialOutlets = ["PU Canteen", "Cafe Gram", "Cibus Cafe"];
+        for (const oName of initialOutlets) {
+            await client.query('INSERT INTO outlets (name) VALUES ($1) ON CONFLICT (name) DO NOTHING', [oName]);
+        }
+
+        // 3. Create Menu Items table (Harden schema)
+        // Final Wipe for transition to normalized outlet_id schema
         await client.query('DROP TABLE IF EXISTS menu_items CASCADE');
         
         await client.query(`
@@ -74,11 +88,12 @@ async function setupDatabase() {
                 name TEXT NOT NULL,
                 category TEXT NOT NULL,
                 price INTEGER NOT NULL,
-                outlet TEXT NOT NULL,
+                outlet_id INTEGER NOT NULL REFERENCES outlets(id),
                 image TEXT NOT NULL,
                 description TEXT,
                 is_best_seller INTEGER DEFAULT 0,
-                is_available BOOLEAN DEFAULT TRUE
+                is_available BOOLEAN DEFAULT TRUE,
+                UNIQUE(name, outlet_id)
             );
         `);
 
@@ -107,16 +122,33 @@ async function setupDatabase() {
             );
         `);
 
-        // Always seed if empty after the drop
-        console.log("Seeding menu items for outlets...");
+        // Seed menu items robustly
+        console.log("Synchronizing stable menu data...");
+        const { rows: existingOutlets } = await client.query('SELECT id, name FROM outlets');
+        const outletMap = existingOutlets.reduce((acc, row) => {
+            acc[row.name] = row.id;
+            return acc;
+        }, {});
+
         for (const item of menuItemsSeed) {
+            const outletId = outletMap[item.outlet];
+            if (!outletId) continue;
+
             const isBest = ['Gram Special Aloo Tikki Burger', 'Margherita Pizza', 'Spring Roll', 'Kulhad Chai'].includes(item.name) ? 1 : 0;
-            // Native fallback to standard TRUE availability on fresh seed
-            await client.query('INSERT INTO menu_items (name, category, price, outlet, image, description, is_best_seller, is_available) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', 
-                [item.name, item.category, item.price, item.outlet, item.image, item.description, isBest, true]);
+            
+            await client.query(`
+                INSERT INTO menu_items (name, category, price, outlet_id, image, description, is_best_seller, is_available)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                ON CONFLICT (name, outlet_id) DO UPDATE SET
+                    category = EXCLUDED.category,
+                    price = EXCLUDED.price,
+                    image = EXCLUDED.image,
+                    description = EXCLUDED.description,
+                    is_best_seller = EXCLUDED.is_best_seller
+            `, [item.name, item.category, item.price, outletId, item.image, item.description, isBest, true]);
         }
         
-        console.log("Database initialized successfully.");
+        console.log("Database persistent state verified.");
     } catch (err) {
         console.error("Database setup error:", err);
     } finally {

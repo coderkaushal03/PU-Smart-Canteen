@@ -17,6 +17,7 @@ const menuItemsSeed = [
     { name: "Schezwan Grilled Sandwich", category: "Sandwich", price: 30, outlet: "PU Canteen", image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80", description: "Spicy schezwan sauce loaded sandwich." },
     { name: "Paneer Puff", category: "Bakery", price: 40, outlet: "PU Canteen", image: "https://aromaticessence.co/wp-content/uploads/2022/08/paneer_puff_featured-500x500.jpg", description: "Flaky puff pastry stuffed with spiced paneer." },
     { name: "Spring Roll", category: "Rolls", price: 60, outlet: "PU Canteen", image: "https://www.cubesnjuliennes.com/wp-content/uploads/2021/01/Spring-Roll-Recipe.jpg", description: "Crispy fried rolls filled with fresh julienned vegetables." },
+    { name: "Samosa", category: "Snacks", price: 15, outlet: "PU Canteen", image: "https://www.cubesnjuliennes.com/wp-content/uploads/2020/08/Best-Indian-Punjabi-Samosa-Recipe.jpg", description: "Crispy Punjabi samosa with spiced potato filling." },
     
     // Cafe Gram
     { name: "Margherita Pizza", category: "Pizza", price: 160, outlet: "Cafe Gram", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80", description: "Classic cheese and tomato pizza." },

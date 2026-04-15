@@ -28,11 +28,11 @@ const menuItemsSeed = [
 
     // Cibus Cafe
     { name: "Plain Maggi", category: "Maggi and Poha", price: 30, outlet: "Cibus Cafe", image: "https://upload.wikimedia.org/wikipedia/commons/1/13/A_bowl_of_Spring_noodles_soup.jpg", description: "Everyone's favorite classic plain Maggi." },
-    { name: "Aloo Paratha", category: "Paratha Hut", price: 80, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1626779815049-36eb42817db4?auto=format&fit=crop&w=800&q=80", description: "Stuffed potato paratha, served hot." },
-    { name: "Plain Dosa", category: "South Indian", price: 60, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1630403759714-27909dd43e67?auto=format&fit=crop&w=800&q=80", description: "Crispy South Indian dosa served with chutney." },
-    { name: "Choley Bhatura", category: "Combo Meals", price: 90, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1626779815049-36eb42817db4?auto=format&fit=crop&w=800&q=80", description: "Spicy chickpea curry with fluffy bhatura." },
+    { name: "Aloo Paratha", category: "Paratha Hut", price: 80, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=800&q=80", description: "Stuffed potato paratha, served hot." },
+    { name: "Plain Dosa", category: "South Indian", price: 60, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80", description: "Crispy South Indian dosa served with chutney." },
+    { name: "Choley Bhatura", category: "Combo Meals", price: 90, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1626777552726-4a6b547b4e5d?auto=format&fit=crop&w=800&q=80", description: "Spicy chickpea curry with fluffy bhatura." },
     { name: "Veg. Momos", category: "Chinese Food", price: 100, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80", description: "Soft steamed momos with spicy dip." },
-    { name: "Kulhad Chai", category: "Hot Warm Up", price: 20, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1576092768241-dec2310123f6?auto=format&fit=crop&w=800&q=80", description: "Traditional spiced tea served in an earthen cup." }
+    { name: "Kulhad Chai", category: "Hot Warm Up", price: 20, outlet: "Cibus Cafe", image: "https://images.unsplash.com/photo-1594911772125-07fc7a2d8d9f?auto=format&fit=crop&w=800&q=80", description: "Traditional spiced tea served in an earthen cup." }
 ];
 
 // Initialize database schema

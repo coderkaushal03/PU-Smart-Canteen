@@ -122,41 +122,42 @@
 
     <!-- Forgot Password Modal -->
     <div id="resetModal" class="modal-overlay">
-        <div class="modal-content glass-panel" style="max-width: 400px;">
-            <div class="panel-head">
-                <h2 id="resetModalTitle">Forgot Password</h2>
-                <p id="resetModalDesc">Enter your enrollment or email to receive a reset PIN.</p>
+        <div class="modal-content glass-panel" style="max-width: 440px;">
+            <div class="panel-head" style="text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">🔐</div>
+                <h2 id="resetModalTitle" style="font-size: 1.6rem; color: var(--text-main);">Forgot Password</h2>
+                <p id="resetModalDesc" style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">Enter your enrollment or email to receive a secure reset PIN.</p>
             </div>
             
             <!-- Step 1: Identity -->
             <div id="resetStep1">
-                <div class="field" style="margin-bottom: 20px;">
-                    <label>Enrollment / Email</label>
-                    <input id="resetLoginId" type="text" placeholder="PU24BCA101">
+                <div class="field" style="margin-bottom: 24px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--brand); letter-spacing: 1px;">College Credentials</label>
+                    <input id="resetLoginId" type="text" placeholder="Enrollment / Email" style="padding: 16px; border-radius: 12px; font-size: 1rem; border: 2px solid var(--line);">
                 </div>
-                <div class="row action-row">
-                    <button id="sendPinBtn" class="primary-btn">Send PIN</button>
-                    <button class="secondary-btn close-modal-btn">Cancel</button>
+                <div style="display: grid; gap: 12px;">
+                    <button id="sendPinBtn" class="primary-btn" style="padding: 16px;">Generate Reset PIN</button>
+                    <button class="secondary-btn close-modal-btn" style="background: none; box-shadow: none; color: var(--text-muted); padding: 10px;">Back to Login</button>
                 </div>
             </div>
 
             <!-- Step 2: Verification -->
             <div id="resetStep2" style="display: none;">
-                <div class="field" style="margin-bottom: 12px;">
-                    <label>Enter 6-Digit PIN</label>
-                    <input id="resetPinCode" type="text" maxlength="6" placeholder="000000" style="text-align: center; letter-spacing: 4px; font-weight: 800;">
+                <div class="field" style="margin-bottom: 16px; text-align: center;">
+                    <label style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--brand); letter-spacing: 1px;">Secure Verification PIN</label>
+                    <input id="resetPinCode" type="text" maxlength="6" class="reset-pin-input" placeholder="000000">
                 </div>
-                <div class="field" style="margin-bottom: 20px;">
-                    <label>New Password</label>
-                    <input id="resetNewPassword" type="password" placeholder="Min 6 characters">
+                <div class="field" style="margin-bottom: 24px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Create New Password</label>
+                    <input id="resetNewPassword" type="password" placeholder="Minimum 6 characters" style="padding: 16px; border-radius: 12px; font-size: 1rem; border: 2px solid var(--line);">
                 </div>
-                <div class="row action-row">
-                    <button id="confirmResetBtn" class="primary-btn">Reset Password</button>
-                    <button class="secondary-btn close-modal-btn">Cancel</button>
+                <div style="display: grid; gap: 12px;">
+                    <button id="confirmResetBtn" class="primary-btn" style="padding: 16px;">Update Password</button>
+                    <button class="secondary-btn close-modal-btn" style="background: none; box-shadow: none; color: var(--text-muted); padding: 10px;">Cancel Reset</button>
                 </div>
             </div>
 
-            <p id="resetNotice" style="margin-top: 15px; font-size: 0.85rem; color: #ef4444; font-weight: 600;"></p>
+            <p id="resetNotice" style="margin-top: 24px; padding: 12px; border-radius: 8px; font-size: 0.88rem; text-align: center; display: none;"></p>
         </div>
     </div>
 
@@ -182,10 +183,13 @@
 
         document.getElementById("sendPinBtn").addEventListener("click", async () => {
             const loginId = document.getElementById("resetLoginId").value.trim();
-            if(!loginId) return resetNotice.textContent = "Please enter your ID.";
+            if(!loginId) {
+                resetNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+                return resetNotice.textContent = "Please enter your enrollment or email.";
+            }
             
-            resetNotice.style.color = "var(--brand)";
-            resetNotice.textContent = "Processing...";
+            resetNotice.style.cssText = "display: block; background: #f3f4f6; color: var(--text-muted);";
+            resetNotice.textContent = "Verifying identity...";
             
             try {
                 const response = await fetch(`${API_BASE}/api/auth/forgot-password`, {
@@ -199,16 +203,17 @@
                     targetUserId = data.userId;
                     resetStep1.style.display = "none";
                     resetStep2.style.display = "block";
-                    document.getElementById("resetModalTitle").textContent = "Verify PIN";
-                    document.getElementById("resetModalDesc").textContent = "Check your 'Email' for the 6-digit PIN.";
-                    resetNotice.style.color = "var(--brand)";
-                    resetNotice.textContent = `[DEMO] Reset PIN: ${data.demoPin}`;
+                    document.getElementById("resetModalTitle").textContent = "Verify Identity";
+                    document.getElementById("resetModalDesc").textContent = "We found your account! Check your 'Email' for the 6-digit verification PIN.";
+                    resetNotice.style.cssText = "display: block; background: #ecfdf5; color: #059669; border: 1px solid #10b981;";
+                    resetNotice.innerHTML = `<strong>Success:</strong> A reset PIN has been generated.<br><span style="font-size: 1.1rem; letter-spacing: 2px;">PIN: ${data.demoPin}</span>`;
                 } else {
-                    resetNotice.style.color = "#ef4444";
-                    resetNotice.textContent = data.error || "Failed to initiate reset.";
+                    resetNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+                    resetNotice.textContent = data.error || "We couldn't find an account with that ID.";
                 }
             } catch (e) {
-                resetNotice.textContent = "Server error.";
+                resetNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+                resetNotice.textContent = "Server connection lost. Please try again.";
             }
         });
 
@@ -217,7 +222,8 @@
             const newPassword = document.getElementById("resetNewPassword").value;
             
             if(pin.length < 6 || newPassword.length < 6) {
-                return resetNotice.textContent = "Enter valid PIN and password (min 6 chars).";
+                resetNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+                return resetNotice.textContent = "Please enter the 6-digit PIN and a new password (min 6 characters).";
             }
 
             try {
@@ -229,17 +235,18 @@
                 const data = await response.json();
                 
                 if(response.ok) {
-                    alert("Password reset successful! You can now login.");
+                    alert("✅ Password successfully updated! Log in with your new credentials.");
                     resetModal.classList.remove("active");
-                    // Clear inputs for next time
+                    // Clear inputs
                     document.getElementById("resetPinCode").value = "";
                     document.getElementById("resetNewPassword").value = "";
                 } else {
-                    resetNotice.style.color = "#ef4444";
-                    resetNotice.textContent = data.error || "Reset failed.";
+                    resetNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+                    resetNotice.textContent = data.error || "The PIN you entered is incorrect or has expired.";
                 }
             } catch (e) {
-                resetNotice.textContent = "Server error.";
+                resetNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+                resetNotice.textContent = "Verification failed due to a server error.";
             }
         });
     </script>

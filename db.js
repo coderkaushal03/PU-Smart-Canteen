@@ -56,6 +56,12 @@ async function setupDatabase() {
             );
         `);
 
+        // Migration: Ensure reset columns exist even if table already existed
+        await client.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_pin TEXT;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_expiry TIMESTAMP;
+        `);
+
         // Seed Users if empty
         const { rows: uRows } = await client.query('SELECT COUNT(*) as count FROM users');
         if (parseInt(uRows[0].count) === 0) {

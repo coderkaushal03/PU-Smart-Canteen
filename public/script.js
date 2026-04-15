@@ -76,11 +76,12 @@ let cart = [];
 const fallbackImage =
     "data:image/svg+xml;utf8," +
     encodeURIComponent(
-        "<svg xmlns='http://www.w3.org/2000/svg' width='900' height='600'>" +
-        "<rect width='100%' height='100%' fill='#e5e7eb'/>" +
-        "<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' " +
-        "font-family='Segoe UI, sans-serif' font-size='42' fill='#374151'>Food Image</text>" +
-        "</svg>"
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'>
+            <rect width='100%' height='100%' fill='#f1f5f9'/>
+            <path d='M170 120h60a10 10 0 0 1 10 10v40a10 10 0 0 1-10 10h-60a10 10 0 0 1-10-10v-40a10 10 0 0 1 10-10z' fill='#cbd5e1'/>
+            <circle cx='200' cy='150' r='20' fill='#94a3b8'/>
+            <text x='50%' y='210' text-anchor='middle' font-family='system-ui' font-size='16' font-weight='600' fill='#64748b'>Delicious Food Ready</text>
+        </svg>`
     );
 
 function getItemPriceByName(name) {

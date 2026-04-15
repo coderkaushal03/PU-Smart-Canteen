@@ -1,13 +1,9 @@
 const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
+require('dotenv').config();
 
-// Configure database connection
-// In Vercel, we use process.env.DATABASE_URL
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false // Required for Neon/Supabase
-    }
+    ssl: { rejectUnauthorized: false }
 });
 
 const menuItemsSeed = [
@@ -36,115 +32,24 @@ const menuItemsSeed = [
     { name: "Kulhad Chai", category: "Hot Warm Up", price: 20, outlet: "Cibus Cafe", image: "https://b.zmtcdn.com/data/dish_photos/891/24885319d5db82a2794a629764b5b891.jpg", description: "Traditional spiced tea served in an earthen cup." }
 ];
 
-// Initialize database schema
-async function setupDatabase() {
+async function run() {
     const client = await pool.connect();
     try {
-        // Create Users table
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                name TEXT,
-                enrollment TEXT,
-                email TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                role TEXT DEFAULT 'Student',
-                balance INTEGER DEFAULT 500,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-
-        // Seed Users if empty
-        const { rows: uRows } = await client.query('SELECT COUNT(*) as count FROM users');
-        if (parseInt(uRows[0].count) === 0) {
-            console.log("Seeding test users...");
-            const hashedPw = await bcrypt.hash("password123", 10);
-            await client.query('INSERT INTO users (name, enrollment, email, password, role, balance) VALUES ($1, $2, $3, $4, $5, $6)', 
-                ["Test Student", "TEST1234", "student@test.com", hashedPw, "Student", 1000]);
-            await client.query('INSERT INTO users (name, enrollment, email, password, role, balance) VALUES ($1, $2, $3, $4, $5, $6)', 
-                ["Canteen Admin", "ADMIN001", "admin@test.com", hashedPw, "Admin", 9999]);
-        }
-
-        // 2. Create Outlets table
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS outlets (
-                id SERIAL PRIMARY KEY,
-                name TEXT UNIQUE NOT NULL
-            );
-        `);
-
-        // Seed Outlets if empty
-        const initialOutlets = ["PU Canteen", "Cafe Gram", "Cibus Cafe"];
-        for (const oName of initialOutlets) {
-            await client.query('INSERT INTO outlets (name) VALUES ($1) ON CONFLICT (name) DO NOTHING', [oName]);
-        }
-
-        // 3. Create Menu Items table (Harden schema)
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS menu_items (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                category TEXT NOT NULL,
-                price INTEGER NOT NULL,
-                outlet_id INTEGER NOT NULL REFERENCES outlets(id),
-                image TEXT NOT NULL,
-                description TEXT,
-                is_best_seller INTEGER DEFAULT 0,
-                is_available BOOLEAN DEFAULT TRUE,
-                UNIQUE(name, outlet_id)
-            );
-        `);
+        console.log("Starting manual re-seed...");
         
-        console.log("Synchronizing stable menu data...");
-        
-        // Safety: ensure Samosa existence if not present
-        console.log("Starting menu synchronization...");
+        // 1. Get Outlets
+        const { rows: outlets } = await client.query('SELECT id, name FROM outlets');
+        const outletMap = outlets.reduce((acc, o) => ({...acc, [o.name]: o.id}), {});
+        console.log("Current Outlets:", outletMap);
 
-        // Create Orders table
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS orders (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL REFERENCES users(id),
-                token TEXT NOT NULL,
-                pickup_time TEXT NOT NULL,
-                notes TEXT,
-                total INTEGER NOT NULL,
-                status TEXT DEFAULT 'Pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-
-        // Create Order Items table
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS order_items (
-                id SERIAL PRIMARY KEY,
-                order_id INTEGER NOT NULL REFERENCES orders(id),
-                item_name TEXT NOT NULL,
-                qty INTEGER NOT NULL,
-                price INTEGER NOT NULL
-            );
-        `);
-
-        // Seed menu items robustly
-        console.log("Synchronizing stable menu data...");
-        const { rows: existingOutlets } = await client.query('SELECT        // 4. Refresh Menu if on Index
-        if (typeof renderMenu === "function" && document.getElementById("menuGrid")) {
-            allMenuItems = []; // Clear cache to force re-fetch
-            const grid = document.getElementById("menuGrid");
-            if (grid) grid.innerHTML = '<div class="loading-spinner">Refreshing menu...</div>';
-            renderMenu();
-        }, {});
-
-        // Begin Transaction for resilient seeding
+        // 2. Perform transaction-based seed
         await client.query('BEGIN');
-        let seededCount = 0;
-
         for (const item of menuItemsSeed) {
-            const outletId = outletMap[item.outlet];
-            if (!outletId) continue;
-
-            const isBest = ['Gram Special Aloo Tikki Burger', 'Margherita Pizza', 'Spring Roll', 'Kulhad Chai'].includes(item.name) ? 1 : 0;
-            
+            const oid = outletMap[item.outlet];
+            if (!oid) {
+                console.error(`Missing outlet: ${item.outlet}`);
+                continue;
+            }
             await client.query(`
                 INSERT INTO menu_items (name, category, price, outlet_id, image, description, is_best_seller, is_available)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -152,22 +57,22 @@ async function setupDatabase() {
                     category = EXCLUDED.category,
                     price = EXCLUDED.price,
                     image = EXCLUDED.image,
-                    description = EXCLUDED.description,
-                    is_best_seller = EXCLUDED.is_best_seller
-            `, [item.name, item.category, item.price, outletId, item.image, item.description, isBest, true]);
-            seededCount++;
+                    description = EXCLUDED.description
+            `, [item.name, item.category, item.price, oid, item.image, item.description, 0, true]);
         }
-        
         await client.query('COMMIT');
-        console.log(`Database persistent state verified. Seeded/Updated ${seededCount} items.`);
-    } catch (err) {
-        console.error("Database setup error:", err);
+        
+        // 3. Verify total count
+        const { rows: count } = await client.query('SELECT count(*) FROM menu_items');
+        console.log(`Success! Total items in DB: ${count[0].count}`);
+        
+    } catch (e) {
+        await client.query('ROLLBACK');
+        console.error("Migration failed:", e);
     } finally {
         client.release();
+        pool.end();
     }
 }
 
-module.exports = {
-    pool,
-    setupDatabase
-};
+run();

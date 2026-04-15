@@ -798,6 +798,8 @@ document.addEventListener("click", (e) => {
         // 4. Refresh Menu if on Index
         if (typeof renderMenu === "function" && document.getElementById("menuGrid")) {
             allMenuItems = []; // Clear cache to force re-fetch
+            const grid = document.getElementById("menuGrid");
+            if (grid) grid.innerHTML = '<div class="loading-spinner">Refreshing menu...</div>';
             renderMenu();
         }
 

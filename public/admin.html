@@ -552,10 +552,14 @@
         }
 
         let allOrders = [];
+        let prevOrdersCount = -1; // Track for sound alerts
         let allMenuItems = [];
         let totalSystemUsers = 0;
         let revenueChartInstance = null;
         let outletChartInstance = null;
+
+        // Sound for New Orders
+        const newOrderSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
         // UI Tabs Switching
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -590,7 +594,15 @@
                 }
 
                 if (resOrders.ok) {
-                    allOrders = await resOrders.json();
+                    const latestOrders = await resOrders.json();
+                    
+                    // WOW Feature 2: Sound Alert for New Orders
+                    if (prevOrdersCount !== -1 && latestOrders.length > prevOrdersCount) {
+                        newOrderSound.play().catch(e => console.log("Sound autoplay blocked. Interact with page to enable."));
+                    }
+                    
+                    allOrders = latestOrders;
+                    prevOrdersCount = allOrders.length;
                     renderKanban(allOrders);
                 }
 

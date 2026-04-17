@@ -741,9 +741,20 @@ if (drawerCheckoutForm) {
                 renderCart();
                 toggleDrawer(true);
                 showToast(`Order confirmed! Rs ${cartTotalCost} deducted.`, "success");
+                
+                // WOW Feature 1: Confetti Explosion!
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#10b981', '#3b82f6', '#f59e0b']
+                    });
+                }
+
                 renderOrders(); 
                 // Wait briefly then refresh auth status (and wallet balance)
-                setTimeout(() => window.location.reload(), 1500);
+                setTimeout(() => window.location.reload(), 2000); // Slightly more time to see confetti
             } else {
                 if(drawerErrorMsg) drawerErrorMsg.textContent = data.error || "Failed to place order.";
             }

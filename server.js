@@ -391,7 +391,7 @@ app.post('/api/wallet/topup', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'Invalid top-up amount' });
         }
 
-        const userId = req.user.userId;
+        const userId = req.user.id;
         
         // Update user balance
         const result = await pool.query(

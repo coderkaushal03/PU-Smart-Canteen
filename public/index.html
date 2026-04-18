@@ -6,8 +6,9 @@
     <title>Smart Canteen - Student Pre Order</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="favicon.png" type="image/png">
-    <!-- Confetti Library for Wow Factor -->
+    <!-- UI Enhancement Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="topbar index-topbar">
@@ -287,6 +288,41 @@
                 <p>Thank you for dining with us!</p>
                 <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Smart Wallet Top-up Modal -->
+    <div id="walletModal" class="modal-overlay">
+        <div class="modal-content glass-panel" style="max-width: 440px;">
+            <div class="panel-head" style="text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">💳</div>
+                <h2 style="font-size: 1.6rem; color: var(--text-main);">Smart Wallet Top-up</h2>
+                <p style="font-size: 0.95rem; color: var(--text-muted);">Recharge your account instantly using UPI.</p>
+            </div>
+
+            <!-- Step 1: Amount -->
+            <div id="walletStep1">
+                <div class="field" style="margin-bottom: 24px;">
+                    <label style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--brand); letter-spacing: 1px;">Enter Amount (₹)</label>
+                    <input id="topupAmount" type="number" placeholder="e.g. 100" style="padding: 16px; border-radius: 12px; font-size: 1.2rem; border: 2px solid var(--line); text-align: center; font-weight: 700;">
+                </div>
+                <div style="display: grid; gap: 12px;">
+                    <button id="generateQrBtn" class="primary-btn" style="padding: 16px;">Generate Payment QR</button>
+                    <button class="secondary-btn close-wallet-btn" style="background: none; box-shadow: none; color: var(--text-muted); padding: 10px;">Back</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Pay & Verify -->
+            <div id="walletStep2" style="display: none; text-align: center;">
+                <div id="qrcodeContainer" style="display: flex; justify-content: center; margin-bottom: 20px; padding: 15px; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);"></div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px;">Scan this QR with any UPI app (GPay, PhonePe, etc.) to pay <strong id="displayAmount">₹0</strong> to <strong>Kaushal Sharma</strong>.</p>
+                <div style="display: grid; gap: 12px;">
+                    <button id="verifyTopupBtn" class="primary-btn" style="padding: 16px;">I Have Paid, Verify Now</button>
+                    <button class="secondary-btn close-wallet-btn" style="background: none; box-shadow: none; color: var(--text-muted); padding: 10px;">Cancel</button>
+                </div>
+            </div>
+
+            <p id="walletNotice" style="margin-top: 24px; padding: 12px; border-radius: 8px; font-size: 0.88rem; text-align: center; display: none;"></p>
         </div>
     </div>
 

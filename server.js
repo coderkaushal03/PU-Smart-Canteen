@@ -383,6 +383,40 @@ app.put('/api/admin/menu/:id/availability', authenticateToken, isAdmin, async (r
 });
 
 
+// Wallet Top-up (Authenticated)
+app.post('/api/wallet/topup', authenticateToken, async (req, res) => {
+    try {
+        const { amount } = req.body;
+        if (!amount || amount <= 0 || isNaN(amount)) {
+            return res.status(400).json({ error: 'Invalid top-up amount' });
+        }
+
+        const userId = req.user.userId;
+        
+        // Update user balance
+        const result = await pool.query(
+            'UPDATE users SET balance = balance + $1 WHERE id = $2 RETURNING balance',
+            [amount, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const newBalance = result.rows[0].balance;
+        
+        console.log(`[WALLET] User ${userId} topped up Rs ${amount}. New balance: Rs ${newBalance}`);
+        
+        res.json({ 
+            message: 'Wallet recharged successfully!', 
+            newBalance 
+        });
+    } catch (error) {
+        console.error('Topup Error:', error);
+        res.status(500).json({ error: 'Failed to process recharge' });
+    }
+});
+
 // Initialize DB and start server
 setupDatabase().then(() => {
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {

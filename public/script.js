@@ -591,8 +591,9 @@ async function checkAuthStatus() {
                 localStorage.setItem("smartCanteenUser", JSON.stringify(user));
                 authLink.outerHTML = `
                     <div class="auth-controls">
-                        <div class="user-auth-badge wallet-pill">
+                        <div class="user-auth-badge wallet-pill" style="display:flex; align-items:center; gap:10px;">
                             <span style="font-weight:700">Wallet: Rs ${user.balance}</span>
+                            <button id="openWalletBtn" style="background: var(--brand); border: none; color: white; border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 0.8rem; font-weight:700;">+ Top up</button>
                         </div>
                         <div class="user-auth-badge welcome-pill">
                             <span class="user-name">Welcome, ${user.name || user.enrollment || user.email || 'Student'}</span>
@@ -600,6 +601,9 @@ async function checkAuthStatus() {
                         <button id="logoutBtn" class="user-auth-badge logout-pill">Logout</button>
                     </div>
                 `;
+                
+                document.getElementById("openWalletBtn").addEventListener("click", () => openWalletModal());
+                
                 document.getElementById("logoutBtn").addEventListener("click", () => {
                     localStorage.removeItem("smartCanteenToken");
                     localStorage.removeItem("smartCanteenUser");
@@ -815,5 +819,107 @@ document.addEventListener("click", (e) => {
         }
 
         showToast("Refreshing live data...", "info");
+    }
+});
+
+// --- Smart Wallet QR Payment Integration ---
+const walletModal = document.getElementById("walletModal");
+const walletStep1 = document.getElementById("walletStep1");
+const walletStep2 = document.getElementById("walletStep2");
+const walletNotice = document.getElementById("walletNotice");
+const qrcodeContainer = document.getElementById("qrcodeContainer");
+
+let qrInstance = null;
+let topupAmount = 0;
+
+function openWalletModal() {
+    walletModal.classList.add("active");
+    walletStep1.style.display = "block";
+    walletStep2.style.display = "none";
+    walletNotice.style.display = "none";
+    document.getElementById("topupAmount").value = "";
+    document.getElementById("topupAmount").focus();
+}
+
+document.querySelectorAll(".close-wallet-btn").forEach(btn => {
+    btn.addEventListener("click", () => walletModal.classList.remove("active"));
+});
+
+document.getElementById("generateQrBtn").addEventListener("click", () => {
+    const amountInput = document.getElementById("topupAmount").value;
+    topupAmount = parseFloat(amountInput);
+
+    if (!topupAmount || topupAmount <= 0) {
+        walletNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+        walletNotice.textContent = "Please enter a valid amount.";
+        return;
+    }
+
+    // Generate UPI URL
+    // Format: upi://pay?pa=VPA&pn=NAME&am=AMOUNT&cu=CURRENCY
+    const upiId = "coderkaushal03@okicici";
+    const name = "Kaushal Sharma";
+    const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${topupAmount}&cu=INR`;
+
+    // Clear previous QR
+    qrcodeContainer.innerHTML = "";
+    
+    // Create new QR
+    qrInstance = new QRCode(qrcodeContainer, {
+        text: upiUrl,
+        width: 200,
+        height: 200,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    document.getElementById("displayAmount").textContent = `₹${topupAmount}`;
+    walletStep1.style.display = "none";
+    walletStep2.style.display = "block";
+    walletNotice.style.display = "none";
+});
+
+document.getElementById("verifyTopupBtn").addEventListener("click", async () => {
+    const token = localStorage.getItem("smartCanteenToken");
+    if(!token) return;
+
+    walletNotice.style.cssText = "display: block; background: #f3f4f6; color: var(--text-muted);";
+    walletNotice.textContent = "Simulating verification...";
+
+    try {
+        const response = await fetch(`${API_BASE}/api/wallet/topup`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ amount: topupAmount })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            // Success Celebration!
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#10b981', '#3b82f6', '#f59e0b']
+                });
+            }
+
+            alert(`✅ Recharge of ₹${topupAmount} Successful!`);
+            walletModal.classList.remove("active");
+            
+            // Re-fetch our profile to get new balance and refresh the page UI
+            window.location.reload(); 
+        } else {
+            walletNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+            walletNotice.textContent = data.error || "Top-up failed.";
+        }
+    } catch (e) {
+        walletNotice.style.cssText = "display: block; background: #fee2e2; color: #ef4444;";
+        walletNotice.textContent = "Server error. Could not verify.";
     }
 });
